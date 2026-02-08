@@ -1,0 +1,11 @@
+node_modules/
+.next/
+.env
+.DS_Store
+*.log
+out/
+coverage/
+# Optional: OS or editor files
+.vscode/
+.idea/
+*.swp
