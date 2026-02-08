@@ -84,3 +84,21 @@ Follow-up prompt: make games square cards on main page, move tags to top-right, 
 - Extended catalog metadata with `ageGroup` and `image` fields.
 - Synced `/games` page cards to new square + preview layout.
 - Validation passed: `npm run build`.
+
+Follow-up prompt: make compact square game cards with corrected preview image positioning; add scalable translations (UA default + EN secondary); make balloon game input translatable and reusable.
+
+- Added scalable i18n infrastructure:
+  - `lib/i18n/messages.js` (dictionaries)
+  - `lib/i18n/I18nProvider.js` (`t`, locale state, persistence)
+  - `app/providers.js` wired in `app/layout.js`
+- Added reusable localization UI pieces:
+  - `components/LocaleSwitcher.js`
+  - `components/KidWordInput.js` with locale-specific keyboard layouts
+- Refactored balloon game to use i18n + reusable `KidWordInput` module.
+- Portal and games pages now use translation keys from `games/catalog.js` + i18n labels.
+- Compact square card update:
+  - fixed small card size (`220x220`, responsive `170x170`)
+  - corrected preview image fit/position with `object-fit: contain` and internal padding
+  - kept tags in top-right of description area
+- Updated README with i18n + reusable module documentation.
+- Validation passed: `npm run build`.

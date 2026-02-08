@@ -3,21 +3,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
+import LocaleSwitcher from '../components/LocaleSwitcher';
 import { gamesCatalog } from '../games/catalog';
+import { useI18n } from '../lib/i18n/I18nProvider';
 import styles from './portal.module.css';
 
 export default function HomePage() {
+  const { t } = useI18n();
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [selectedAges, setSelectedAges] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
 
   const allAges = useMemo(
     () => Array.from(new Set(gamesCatalog.map((game) => game.ageGroup))),
-    []
+    [t]
   );
   const allTags = useMemo(
     () => Array.from(new Set(gamesCatalog.flatMap((game) => game.skills))),
-    []
+    [t]
   );
 
   const filteredGames = useMemo(() => {
@@ -45,29 +48,27 @@ export default function HomePage() {
             priority
           />
           <div>
-            <p className={styles.kicker}>Playwise</p>
-            <h1>Kid Games Portal</h1>
-            <p>
-              Calm online games for ages 3+ focused on general development and early computer
-              skills.
-            </p>
+            <p className={styles.kicker}>{t('portal.kicker')}</p>
+            <h1>{t('portal.title')}</h1>
+            <p>{t('portal.subtitle')}</p>
           </div>
         </div>
+        <LocaleSwitcher />
         <div className={styles.heroNote}>
-          <p>Soft pastel UI, simple interactions, steady learning rhythm.</p>
+          <p>{t('portal.note')}</p>
         </div>
       </section>
 
       <section>
         <div className={styles.sectionHead}>
-          <h2>Games</h2>
+          <h2>{t('portal.games')}</h2>
           <div className={styles.filterWrap}>
             <button type="button" className={styles.filterToggle} onClick={() => setIsFilterOpen((prev) => !prev)}>
-              Filter
+              {t('portal.filter')}
             </button>
             {isFilterOpen && (
               <div className={styles.filterPanel}>
-                <p>Age</p>
+                <p>{t('portal.age')}</p>
                 <div className={styles.filterOptions}>
                   {allAges.map((age) => (
                     <label key={age}>
@@ -76,11 +77,11 @@ export default function HomePage() {
                         checked={selectedAges.includes(age)}
                         onChange={() => toggleListItem(age, setSelectedAges)}
                       />
-                      <span>{age}</span>
+                      <span>{t(`ages.${age}`)}</span>
                     </label>
                   ))}
                 </div>
-                <p>Tags</p>
+                <p>{t('portal.tags')}</p>
                 <div className={styles.filterOptions}>
                   {allTags.map((tag) => (
                     <label key={tag}>
@@ -89,7 +90,7 @@ export default function HomePage() {
                         checked={selectedTags.includes(tag)}
                         onChange={() => toggleListItem(tag, setSelectedTags)}
                       />
-                      <span>{tag}</span>
+                      <span>{t(tag)}</span>
                     </label>
                   ))}
                 </div>
@@ -101,7 +102,7 @@ export default function HomePage() {
                     setSelectedTags([]);
                   }}
                 >
-                  Clear filters
+                  {t('common.clearFilters')}
                 </button>
               </div>
             )}
@@ -111,24 +112,30 @@ export default function HomePage() {
           {filteredGames.map((game) => (
             <article key={game.slug} className={styles.card}>
               <div className={styles.cardPreview}>
-                <Image src={game.image} alt={`${game.title} preview`} fill sizes="(max-width: 700px) 100vw, 32vw" />
+                <Image
+                  src={game.image}
+                  alt={`${t(game.titleKey)} preview`}
+                  fill
+                  className={styles.previewImage}
+                  sizes="220px"
+                />
               </div>
               <div className={styles.cardBody}>
-                <span className={styles.badge}>{game.age}</span>
+                <span className={styles.badge}>{t(game.ageKey)}</span>
                 <div className={styles.tagsTopRight}>
                   {game.skills.map((skill) => (
-                    <span key={skill}>{skill}</span>
+                    <span key={skill}>{t(skill)}</span>
                   ))}
                 </div>
-                <h3>{game.title}</h3>
-                <p>{game.description}</p>
+                <h3>{t(game.titleKey)}</h3>
+                <p>{t(game.descriptionKey)}</p>
                 <Link href={game.path} className={styles.playLink}>
-                  Open game
+                  {t('common.openGame')}
                 </Link>
               </div>
             </article>
           ))}
-          {filteredGames.length === 0 && <p className={styles.empty}>No games match selected filters.</p>}
+          {filteredGames.length === 0 && <p className={styles.empty}>{t('common.noGamesMatch')}</p>}
         </div>
       </section>
     </main>

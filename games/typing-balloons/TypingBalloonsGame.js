@@ -1,27 +1,30 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import KidWordInput from '../../components/KidWordInput';
+import LocaleSwitcher from '../../components/LocaleSwitcher';
+import { useI18n } from '../../lib/i18n/I18nProvider';
 import styles from './typingBalloons.module.css';
 
 const HIGH_SCORES_KEY = 'kidsTyperHighScoresV1';
-const UKRAINIAN_KEYBOARD_ROWS = [
-  ['Й', 'Ц', 'У', 'К', 'Е', 'Н', 'Г', 'Ґ', 'Ш', 'Щ', 'З', 'Х', 'Ї'],
-  ['Ф', 'І', 'В', 'А', 'П', 'Р', 'О', 'Л', 'Д', 'Ж', 'Є'],
-  ['Я', 'Ч', 'С', 'М', 'И', 'Т', 'Ь', 'Б', 'Ю'],
-];
+
+function toLocaleTag(locale) {
+  return locale === 'en' ? 'en-US' : 'uk-UA';
+}
 
 function randomColor() {
   const colors = ['#ff6b6b', '#ffd93d', '#6bcBef', '#9cf196', '#ff99c8', '#b09fff'];
   return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function createBalloons(word) {
+function createBalloons(word, locale) {
+  const localeTag = toLocaleTag(locale);
   return word
     .split('')
     .filter((ch) => ch.trim().length > 0)
     .map((char, index) => ({
       id: `${char}-${index}-${Math.random().toString(36).slice(2, 8)}`,
-      char: char.toLocaleUpperCase('uk-UA'),
+      char: char.toLocaleUpperCase(localeTag),
       index,
       left: 8 + Math.random() * 84,
       delay: Math.random() * 1.4,
@@ -34,6 +37,7 @@ function createBalloons(word) {
 }
 
 export default function TypingBalloonsGame() {
+  const { locale, t } = useI18n();
   const [text, setText] = useState('');
   const [roundWord, setRoundWord] = useState('');
   const [balloons, setBalloons] = useState([]);
@@ -43,8 +47,16 @@ export default function TypingBalloonsGame() {
   const [roundSaved, setRoundSaved] = useState(false);
   const [speed, setSpeed] = useState(2.2);
   const [strictOrder, setStrictOrder] = useState(true);
-  const [status, setStatus] = useState('Напиши слово або коротке речення.');
+  const [status, setStatus] = useState('');
   const isRoundActive = Boolean(roundWord);
+  const localeTag = toLocaleTag(locale);
+  const quickWords = t('typingGame.quickWords') || [];
+
+  useEffect(() => {
+    if (!roundWord) {
+      setStatus(t('typingGame.status.start'));
+    }
+  }, [roundWord, t]);
 
   const sortedBalloons = useMemo(
     () => [...balloons].sort((a, b) => a.index - b.index),
@@ -81,7 +93,7 @@ export default function TypingBalloonsGame() {
             ) {
               return {
                 score: item.score,
-                word: item.word.toLocaleUpperCase('uk-UA'),
+                word: item.word.toLocaleUpperCase(localeTag),
               };
             }
             return null;
@@ -93,7 +105,7 @@ export default function TypingBalloonsGame() {
     } catch {
       window.localStorage.removeItem(HIGH_SCORES_KEY);
     }
-  }, []);
+  }, [localeTag]);
 
   useEffect(() => {
     if (!isWin || roundSaved) {
@@ -108,21 +120,21 @@ export default function TypingBalloonsGame() {
       window.localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(updated));
       return updated;
     });
-    setStatus('Молодець! Результат додано в таблицю рекордів.');
-  }, [isWin, roundSaved, score, roundWord]);
+    setStatus(t('typingGame.status.resultSaved'));
+  }, [isWin, roundSaved, score, roundWord, t]);
 
   const handleSend = () => {
-    const cleaned = text.trim().toLocaleUpperCase('uk-UA');
+    const cleaned = text.trim().toLocaleUpperCase(localeTag);
 
     if (!cleaned) {
-      setStatus('Введи, будь ласка, хоча б одну літеру.');
+      setStatus(t('typingGame.status.empty'));
       return;
     }
 
-    const freshBalloons = createBalloons(cleaned);
+    const freshBalloons = createBalloons(cleaned, locale);
 
     if (freshBalloons.length === 0) {
-      setStatus('Спробуй слово з літерами.');
+      setStatus(t('typingGame.status.lettersOnly'));
       return;
     }
 
@@ -131,7 +143,7 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
-    setStatus('Супер! Лопай кульки тільки по порядку літер.');
+    setStatus(t('typingGame.status.orderMode'));
   };
 
   const popBalloon = (balloon) => {
@@ -150,12 +162,12 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
-    setStatus('Почнемо нову гру. Напиши слово.');
+    setStatus(t('typingGame.status.newRound'));
   };
 
   const setQuickWord = (word) => {
-    setText(word.toLocaleUpperCase('uk-UA'));
-    setStatus('Натисни "Надіслати", щоб почати гру.');
+    setText(word.toLocaleUpperCase(localeTag));
+    setStatus(t('typingGame.status.quickStart'));
   };
 
   const playAgain = () => {
@@ -165,84 +177,28 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
-    setStatus('Чудово! Введи нове слово для наступної гри.');
-  };
-
-  const addKey = (key) => {
-    setText((prev) => `${prev}${key}`);
-  };
-
-  const removeLastKey = () => {
-    setText((prev) => prev.slice(0, -1));
-  };
-
-  const addSpace = () => {
-    setText((prev) => (prev.endsWith(' ') || prev.length === 0 ? prev : `${prev} `));
-  };
-
-  const clearText = () => {
-    setText('');
+    setStatus(t('typingGame.status.playAgain'));
   };
 
   return (
     <main className={styles.page}>
       <section className={styles.card}>
-        <h1>Моя весела друкарка</h1>
-        <p className={styles.lead}>Друкуй слова і лопай кульки за правильною чергою.</p>
-
-        <label htmlFor="kid-input">Твоє повідомлення</label>
-        <div className={styles.inputRow}>
-          <textarea
-            id="kid-input"
-            value={text}
-            onChange={(e) => setText(e.target.value.toLocaleUpperCase('uk-UA'))}
-            placeholder="Наприклад: киця"
-            rows={3}
-            maxLength={40}
-            disabled={isRoundActive}
-          />
-          <button type="button" className={styles.sendBtn} onClick={handleSend} disabled={isRoundActive}>
-            Надіслати
-          </button>
+        <div className={styles.gameTitleRow}>
+          <h1>{t('typingGame.title')}</h1>
+          <LocaleSwitcher />
         </div>
+        <p className={styles.lead}>{t('typingGame.lead')}</p>
 
-        <div className={styles.keyboardWrap}>
-          <p>Дитяча клавіатура</p>
-          {UKRAINIAN_KEYBOARD_ROWS.map((row, rowIndex) => (
-            <div key={`row-${rowIndex}`} className={styles.keyboardRow}>
-              {row.map((key) => (
-                <button
-                  type="button"
-                  key={key}
-                  className={styles.keyBtn}
-                  disabled={isRoundActive}
-                  onClick={() => addKey(key)}
-                >
-                  {key}
-                </button>
-              ))}
-            </div>
-          ))}
-          <div className={`${styles.keyboardRow} ${styles.keyboardTools}`}>
-            <button type="button" className={`${styles.keyBtn} ${styles.tool}`} disabled={isRoundActive} onClick={addSpace}>
-              Пробіл
-            </button>
-            <button
-              type="button"
-              className={`${styles.keyBtn} ${styles.tool}`}
-              disabled={isRoundActive}
-              onClick={removeLastKey}
-            >
-              Стерти
-            </button>
-            <button type="button" className={`${styles.keyBtn} ${styles.tool}`} disabled={isRoundActive} onClick={clearText}>
-              Очистити
-            </button>
-          </div>
-        </div>
+        <KidWordInput
+          value={text}
+          onChange={(nextValue) => setText(nextValue.toLocaleUpperCase(localeTag))}
+          onSubmit={handleSend}
+          disabled={isRoundActive}
+          maxLength={40}
+        />
 
         <div className={styles.speedControl}>
-          <label htmlFor="speed">Швидкість кульок: {speed.toFixed(1)}x повільніше</label>
+          <label htmlFor="speed">{t('typingGame.speedLabel', { value: speed.toFixed(1) })}</label>
           <input
             id="speed"
             type="range"
@@ -252,24 +208,20 @@ export default function TypingBalloonsGame() {
             value={speed}
             onChange={(e) => setSpeed(Number(e.target.value))}
           />
-          <p>Лівіше швидше, правіше повільніше.</p>
+          <p>{t('typingGame.speedHint')}</p>
         </div>
 
         <div className={styles.quickWords}>
-          <button type="button" className={styles.chip} onClick={() => setQuickWord('котик')}>
-            КОТИК
-          </button>
-          <button type="button" className={styles.chip} onClick={() => setQuickWord('сонце')}>
-            СОНЦЕ
-          </button>
-          <button type="button" className={styles.chip} onClick={() => setQuickWord('мама')}>
-            МАМА
-          </button>
+          {quickWords.map((word) => (
+            <button key={word} type="button" className={styles.chip} onClick={() => setQuickWord(word)}>
+              {word}
+            </button>
+          ))}
         </div>
 
         <div className={styles.controls}>
           <button type="button" className={styles.secondary} onClick={resetRound}>
-            Нова гра
+            {t('typingGame.newGame')}
           </button>
         </div>
 
@@ -278,9 +230,9 @@ export default function TypingBalloonsGame() {
 
       <section className={styles.game} aria-live="polite">
         <div className={styles.gameTop}>
-          <h2>Міні-гра</h2>
+          <h2>{t('portal.games')}</h2>
           <div className={`${styles.orderSwitch} ${styles.orderSwitchInline}`}>
-            <label htmlFor="strict-order">Суворий порядок літер</label>
+            <label htmlFor="strict-order">{t('typingGame.strictOrder')}</label>
             <input
               id="strict-order"
               type="checkbox"
@@ -289,17 +241,17 @@ export default function TypingBalloonsGame() {
             />
           </div>
         </div>
-        {roundWord ? <p>Чарівне слово: {roundWord}</p> : <p>Після надсилання тут з&apos;явиться гра.</p>}
+        {roundWord ? (
+          <p>{t('typingGame.magicWord', { word: roundWord })}</p>
+        ) : (
+          <p>{t('typingGame.gameAppears')}</p>
+        )}
         {roundWord && (
           <p className={styles.hint}>
             {strictOrder ? (
-              <>
-                Наступна літера: <strong>{sortedBalloons[0]?.char || '✓'}</strong>
-              </>
+              <>{t('typingGame.nextLetter', { letter: sortedBalloons[0]?.char || '✓' })}</>
             ) : (
-              <>
-                Режим вільної гри: <strong>лопай будь-яку кульку</strong>
-              </>
+              <>{t('typingGame.freeMode')}</>
             )}
           </p>
         )}
@@ -340,11 +292,13 @@ export default function TypingBalloonsGame() {
               <div className={`${styles.spark} ${styles.spark3}`} />
               <div className={`${styles.spark} ${styles.spark4}`} />
               <div className={styles.winnerCard}>
-                <p className={styles.winnerTitle}>Ура! Перемога!</p>
-                <p className={styles.winnerText}>Ти луснув усі кульки. Молодець!</p>
-                <p className={styles.winnerPoints}>Рахунок: {score}</p>
+                <p className={styles.winnerTitle}>{t('typingGame.winnerTitle')}</p>
+                <p className={styles.winnerText}>{t('typingGame.winnerText')}</p>
+                <p className={styles.winnerPoints}>
+                  {t('typingGame.score')}: {score}
+                </p>
                 <button type="button" className={styles.playAgainBtn} onClick={playAgain}>
-                  Грати ще
+                  {t('typingGame.playAgain')}
                 </button>
               </div>
             </div>
@@ -353,16 +307,16 @@ export default function TypingBalloonsGame() {
 
         <div className={styles.scoreboard} aria-live="polite">
           <p>
-            Рахунок: <strong>{score}</strong>
+            {t('typingGame.score')}: <strong>{score}</strong>
           </p>
           <p>
-            Рекорд: <strong>{highScores[0]?.score || 0}</strong>
+            {t('typingGame.record')}: <strong>{highScores[0]?.score || 0}</strong>
           </p>
         </div>
         <div className={styles.highscoreBoard}>
-          <p>Таблиця рекордів:</p>
+          <p>{t('typingGame.board')}:</p>
           <ol>
-            {highScores.length === 0 && <li>Поки немає рекордів</li>}
+            {highScores.length === 0 && <li>{t('typingGame.noScores')}</li>}
             {highScores.map((item, idx) => (
               <li key={`${item.score}-${item.word}-${idx}`}>
                 {item.score} - {item.word}

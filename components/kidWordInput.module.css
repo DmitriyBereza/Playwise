@@ -1,0 +1,99 @@
+.inputRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: stretch;
+  margin-bottom: 10px;
+}
+
+.inputRow textarea {
+  width: 100%;
+  resize: none;
+  border: 2px solid #f8b89e;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-size: 1.05rem;
+  font-family: inherit;
+  margin: 0;
+}
+
+.inputRow textarea:focus {
+  outline: 3px solid #ffcf9f;
+  border-color: #ff9e6d;
+}
+
+.inputRow textarea:disabled {
+  background: #fff3ea;
+  color: #8b6f5e;
+}
+
+.sendBtn {
+  min-width: 122px;
+}
+
+.sendBtn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+.keyboardWrap {
+  margin: 0 0 12px;
+  padding: 10px 10px 12px;
+  border-radius: 12px;
+  background: #eef8ff;
+  border: 2px solid #c8e6ff;
+}
+
+.keyboardWrap p {
+  margin: 0 0 8px;
+  font-weight: 800;
+}
+
+.keyboardRow {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.keyboardTools {
+  margin-top: 2px;
+}
+
+.keyBtn {
+  min-width: 36px;
+  min-height: 38px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 800;
+  background: #5aa9f8;
+}
+
+.keyBtn:hover {
+  background: #3e96ed;
+}
+
+.tool {
+  background: #5cb98e;
+}
+
+.tool:hover {
+  background: #3fa978;
+}
+
+.keyBtn:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+}
+
+@media (max-width: 700px) {
+  .inputRow {
+    grid-template-columns: 1fr;
+  }
+
+  .sendBtn {
+    width: 100%;
+  }
+}
+

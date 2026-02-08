@@ -1,0 +1,24 @@
+.wrap {
+  display: inline-flex;
+  gap: 6px;
+  background: #f4f0ff;
+  border: 2px solid #d6caef;
+  border-radius: 999px;
+  padding: 4px;
+}
+
+.wrap button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  min-width: 44px;
+  padding: 6px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.wrap button.active {
+  background: #ffffff;
+  box-shadow: 0 2px 6px #8f6a5224;
+}
+

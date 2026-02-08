@@ -23,6 +23,7 @@ The project currently includes:
 - Next.js 14 (App Router)
 - React 18
 - CSS Modules + global base styles
+- i18n context with UA (default) and EN
 
 ## Run Locally
 
@@ -40,12 +41,23 @@ Open:
 ```text
 app/
   layout.js
+  providers.js                 # Global providers (i18n)
   page.js                       # Playwise portal home
   portal.module.css             # Portal styling
   games/
     page.js                     # Catalog page
     typing-balloons/
       page.js                   # Route entry for game module
+
+components/
+  KidWordInput.js               # Reusable translated kid input + keyboard
+  kidWordInput.module.css
+  LocaleSwitcher.js
+
+lib/
+  i18n/
+    I18nProvider.js             # Locale state + translation function
+    messages.js                 # Translation dictionaries
 
 games/
   catalog.js                    # Metadata shown in portal/catalog
@@ -65,7 +77,9 @@ To add a new game:
 2. Add game component + styles in that folder
 3. Create route entry: `app/games/<new-game-slug>/page.js`
 4. Register it in `games/catalog.js`
-5. Verify with:
+5. Add translatable text keys in `lib/i18n/messages.js`
+6. If game has text input, prefer reusing `components/KidWordInput.js`
+7. Verify with:
 
 ```bash
 npm run build

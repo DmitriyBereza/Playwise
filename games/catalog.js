@@ -1,12 +1,12 @@
 export const gamesCatalog = [
   {
     slug: 'typing-balloons',
-    title: 'Typing Balloons',
-    description: 'Type a word and pop matching balloons to train letters and mouse/touch control.',
-    age: 'Ages 3+',
-    ageGroup: '3+',
+    titleKey: 'games.typingBalloons.title',
+    descriptionKey: 'games.typingBalloons.description',
+    ageKey: 'ages.3plus',
+    ageGroup: '3plus',
     image: '/games/typing-balloons-preview.svg',
-    skills: ['Typing', 'Letter order', 'Focus'],
+    skills: ['skills.typing', 'skills.letterOrder', 'skills.focus'],
     path: '/games/typing-balloons',
   },
 ];
