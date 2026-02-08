@@ -102,3 +102,31 @@ Follow-up prompt: make compact square game cards with corrected preview image po
   - kept tags in top-right of description area
 - Updated README with i18n + reusable module documentation.
 - Validation passed: `npm run build`.
+
+Follow-up prompt: create a new game (corgi in forest, math obstacles, 3 answer options, 3 wrong attempts then game over, high score).
+
+Skills used:
+- `game-builder` (primary)
+- `frontend-design` (UI/layout direction for calm kid-focused gameplay)
+
+Implemented:
+- New game module: `games/corgi-math-run/CorgiMathRunGame.js`
+- New game styles: `games/corgi-math-run/corgiMathRun.module.css`
+- New game route: `app/games/corgi-math-run/page.js`
+- Catalog registration with image/tags: `games/catalog.js`
+- New game preview asset: `public/games/corgi-math-run-preview.svg`
+- New game AI context file: `games/corgi-math-run/GAME_INFO.txt`
+- i18n updates in `lib/i18n/messages.js` for both UA and EN:
+  - game title/description
+  - skill labels
+  - full in-game text/statuses
+
+Gameplay behavior:
+- Random simple addition/subtraction equations.
+- 3 multiple-choice answers per obstacle.
+- Score increases per correct answer.
+- 3 wrong attempts total -> game over.
+- High score persisted in localStorage (`corgiMathRunHighScoreV1`).
+
+Validation:
+- `npm run build` passed.

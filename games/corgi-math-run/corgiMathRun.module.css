@@ -1,0 +1,192 @@
+.page {
+  min-height: 100vh;
+}
+
+.card {
+  background: #fffefb;
+  border: 3px solid #e8dcff;
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 12px 24px #8f6a5230;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.head h1 {
+  margin: 0 0 6px;
+}
+
+.head p {
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stats p {
+  margin: 0;
+  border: 2px solid #d8e8f7;
+  background: #f7fcff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 700;
+}
+
+.hearts {
+  margin-top: 10px;
+  font-size: 1.2rem;
+}
+
+.heart {
+  color: #ff7b8f;
+  margin-right: 4px;
+}
+
+.heartLost {
+  color: #d7c7cf;
+  margin-right: 4px;
+}
+
+.status {
+  margin: 8px 0 10px;
+  font-weight: 700;
+}
+
+.track {
+  position: relative;
+  height: 220px;
+  border: 2px solid #d8e8f7;
+  border-radius: 18px;
+  overflow: hidden;
+  background: linear-gradient(180deg, #eafff7 0%, #f5ffe8 56%, #fef7e9 56%, #f7ead9 100%);
+}
+
+.trees {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+  background-image: radial-gradient(circle at 12% 44%, #9ad9a4 0, #9ad9a4 22px, transparent 24px),
+    radial-gradient(circle at 26% 38%, #a4e1ad 0, #a4e1ad 20px, transparent 22px),
+    radial-gradient(circle at 45% 42%, #8fd49a 0, #8fd49a 24px, transparent 26px),
+    radial-gradient(circle at 72% 40%, #a6e3af 0, #a6e3af 19px, transparent 21px),
+    radial-gradient(circle at 88% 45%, #8fd49a 0, #8fd49a 22px, transparent 24px);
+}
+
+.road {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 30px;
+  height: 52px;
+  background: linear-gradient(90deg, #f2ddc4, #f7e9d2);
+  border-top: 2px dashed #d8bea3;
+}
+
+.progressLine {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: #f0d8c0;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #8fd49a, #7bc5ed);
+  transition: width 0.2s ease-out;
+}
+
+.corgi {
+  position: absolute;
+  bottom: 62px;
+  transform: translateX(-50%);
+  font-size: 2.2rem;
+  filter: drop-shadow(0 2px 2px #00000025);
+  animation: hop 1s ease-in-out infinite;
+}
+
+.obstacle {
+  position: absolute;
+  right: 48px;
+  bottom: 64px;
+  font-size: 2rem;
+}
+
+.quiz {
+  margin-top: 14px;
+  border: 2px solid #d9c8f0;
+  border-radius: 16px;
+  padding: 12px;
+  background: #fcf8ff;
+}
+
+.quiz p,
+.quiz h2 {
+  margin: 0 0 8px;
+}
+
+.options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.options button,
+.gameOver button {
+  border: 0;
+  border-radius: 999px;
+  background: #ffb889;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px 16px;
+  cursor: pointer;
+  min-width: 72px;
+}
+
+.gameOver {
+  margin-top: 14px;
+  border: 2px solid #ffd8b8;
+  border-radius: 16px;
+  padding: 12px;
+  background: #fff8ed;
+}
+
+.gameOver h2,
+.gameOver p {
+  margin: 0 0 10px;
+}
+
+@keyframes hop {
+  0%,
+  100% {
+    transform: translateX(-50%) translateY(0);
+  }
+
+  50% {
+    transform: translateX(-50%) translateY(-6px);
+  }
+}
+
+@media (max-width: 760px) {
+  .head {
+    flex-direction: column;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}
+

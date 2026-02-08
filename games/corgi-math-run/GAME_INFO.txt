@@ -1,0 +1,24 @@
+Game: Corgi Math Run
+Audience: Kids 3-6
+
+Purpose:
+- Train very basic arithmetic (simple addition/subtraction).
+- Build decision-making under gentle game pressure.
+- Encourage focus and repeated attempts with positive feedback.
+
+Core loop:
+1) Corgi runs through a forest track.
+2) A simple equation appears as an obstacle.
+3) Child chooses one of 3 answer options.
+4) Correct answer increases score and moves to next obstacle.
+5) Wrong answers consume attempts (3 total), then game over.
+
+State and scoring:
+- `score` increments by 1 per correct answer.
+- `wrongAttempts` increments per wrong answer.
+- `highScore` stored in localStorage key: `corgiMathRunHighScoreV1`.
+
+Main files:
+- `games/corgi-math-run/CorgiMathRunGame.js`
+- `games/corgi-math-run/corgiMathRun.module.css`
+- Route: `app/games/corgi-math-run/page.js`
