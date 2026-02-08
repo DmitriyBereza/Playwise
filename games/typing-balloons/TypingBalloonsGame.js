@@ -286,7 +286,6 @@ export default function TypingBalloonsGame() {
               type="checkbox"
               checked={strictOrder}
               onChange={(e) => setStrictOrder(e.target.checked)}
-              disabled={isRoundActive}
             />
           </div>
         </div>
