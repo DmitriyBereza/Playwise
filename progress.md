@@ -65,3 +65,7 @@ Follow-up prompt: encapsulate games in separate folders, create Playwise kids-ga
 
 TODOs / suggestions:
 - When adding next games, create `games/<slug>/` module first, then route at `app/games/<slug>/page.js` and register in `games/catalog.js`.
+
+- Updated strict-order toggle behavior: it can now be changed during an active game round.
+- Removed `disabled={isRoundActive}` from strict-order checkbox in `games/typing-balloons/TypingBalloonsGame.js`.
+- Validation passed: `npm run build`.
