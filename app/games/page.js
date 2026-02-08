@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { gamesCatalog } from '../../games/catalog';
 import styles from '../portal.module.css';
@@ -12,17 +13,22 @@ export default function GamesPage() {
       <div className={styles.grid}>
         {gamesCatalog.map((game) => (
           <article key={game.slug} className={styles.card}>
-            <span className={styles.badge}>{game.age}</span>
-            <h3>{game.title}</h3>
-            <p>{game.description}</p>
-            <div className={styles.tags}>
-              {game.skills.map((skill) => (
-                <span key={skill}>{skill}</span>
-              ))}
+            <div className={styles.cardPreview}>
+              <Image src={game.image} alt={`${game.title} preview`} fill sizes="(max-width: 700px) 100vw, 32vw" />
             </div>
-            <Link href={game.path} className={styles.playLink}>
-              Open game
-            </Link>
+            <div className={styles.cardBody}>
+              <span className={styles.badge}>{game.age}</span>
+              <div className={styles.tagsTopRight}>
+                {game.skills.map((skill) => (
+                  <span key={skill}>{skill}</span>
+                ))}
+              </div>
+              <h3>{game.title}</h3>
+              <p>{game.description}</p>
+              <Link href={game.path} className={styles.playLink}>
+                Open game
+              </Link>
+            </div>
           </article>
         ))}
       </div>

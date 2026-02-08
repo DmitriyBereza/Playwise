@@ -69,3 +69,18 @@ TODOs / suggestions:
 - Updated strict-order toggle behavior: it can now be changed during an active game round.
 - Removed `disabled={isRoundActive}` from strict-order checkbox in `games/typing-balloons/TypingBalloonsGame.js`.
 - Validation passed: `npm run build`.
+
+Follow-up prompt: make games square cards on main page, move tags to top-right, replace See all with unfoldable filter (tags + age), add per-game text description file, and add game screenshot previews.
+
+- Updated portal cards to square layout with preview image area.
+- Moved skill tags to top-right inside card description area.
+- Replaced `See all` button on main page with unfoldable filter panel.
+- Added filtering by both age group and tags on main page.
+- Added empty-state text when no game matches selected filters.
+- Added preview image asset for typing game:
+  - `public/games/typing-balloons-preview.svg`
+- Added per-game AI context file:
+  - `games/typing-balloons/GAME_INFO.txt`
+- Extended catalog metadata with `ageGroup` and `image` fields.
+- Synced `/games` page cards to new square + preview layout.
+- Validation passed: `npm run build`.

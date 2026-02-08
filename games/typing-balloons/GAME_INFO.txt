@@ -1,0 +1,24 @@
+Game: Typing Balloons
+Audience: Kids 3+
+
+Purpose:
+- Build early typing confidence.
+- Train letter recognition and sequence tracking.
+- Improve fine-motor control for mouse/touchpad/touch interaction.
+
+Core loop:
+1) Child enters a word.
+2) Game spawns one balloon per letter.
+3) Child pops balloons (strict-order mode on/off).
+4) Score and highscores are tracked in local storage.
+
+Key UX traits:
+- Calm pastel visual style.
+- Large controls and on-screen keyboard.
+- Adjustable balloon speed.
+- Optional strict order mode and clear progress feedback.
+
+Notes for future agents:
+- Main game component: games/typing-balloons/TypingBalloonsGame.js
+- Game styles: games/typing-balloons/typingBalloons.module.css
+- Registered in games/catalog.js
