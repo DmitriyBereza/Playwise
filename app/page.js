@@ -39,23 +39,22 @@ export default function HomePage() {
   return (
     <main className={styles.portal}>
       <section className={styles.hero}>
-        <div className={styles.brand}>
-          <Image
-            src="/playwise-logo.svg"
-            alt="Playwise logo"
-            width={104}
-            height={104}
-            priority
-          />
-          <div>
-            <p className={styles.kicker}>{t('portal.kicker')}</p>
-            <h1>{t('portal.title')}</h1>
-            <p>{t('portal.subtitle')}</p>
+        <div className={styles.heroTop}>
+          <div className={styles.brand}>
+            <Image
+              src="/playwise-logo.svg"
+              alt="Playwise logo"
+              width={104}
+              height={104}
+              priority
+            />
+            <div>
+              <p className={styles.kicker}>{t('portal.kicker')}</p>
+              <h1>{t('portal.title')}</h1>
+              <p>{t('portal.subtitle')}</p>
+            </div>
           </div>
-        </div>
-        <LocaleSwitcher />
-        <div className={styles.heroNote}>
-          <p>{t('portal.note')}</p>
+          <LocaleSwitcher />
         </div>
       </section>
 

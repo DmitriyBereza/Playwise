@@ -2,7 +2,7 @@
 .gamePage {
   min-height: 100vh;
   padding: 24px;
-  max-width: 1160px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -15,6 +15,13 @@
   box-shadow: 0 12px 28px #987ab726;
   display: grid;
   gap: 14px;
+}
+
+.heroTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
 }
 
 .brand {
@@ -39,14 +46,6 @@
 
 .hero p {
   margin: 0;
-}
-
-.heroNote {
-  background: #f2f9ff;
-  border: 2px solid #cee9ff;
-  border-radius: 14px;
-  padding: 12px;
-  font-weight: 700;
 }
 
 .sectionHead {
@@ -90,6 +89,8 @@
 
 .badge {
   display: inline-block;
+  justify-self: start;
+  width: fit-content;
   background: #e6f4ff;
   border: 2px solid #bfdef3;
   border-radius: 999px;
@@ -269,6 +270,10 @@
 
   .brand {
     align-items: flex-start;
+  }
+
+  .heroTop {
+    flex-direction: column;
   }
 
   .headActions {
