@@ -54,19 +54,12 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 12px;
+  position: relative;
 }
 
 .sectionHead h2,
 .sectionHead h1 {
   margin: 0;
-}
-
-.sectionHead a {
-  background: #d8f1da;
-  border: 2px solid #b7dfbb;
-  border-radius: 999px;
-  padding: 8px 14px;
-  font-weight: 800;
 }
 
 .grid {
@@ -79,8 +72,12 @@
   background: #fffefb;
   border: 3px solid #e8dcff;
   border-radius: 22px;
-  padding: 16px;
+  padding: 10px;
   box-shadow: 0 10px 18px #8f6a521b;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-rows: 48% 1fr;
+  gap: 10px;
 }
 
 .badge {
@@ -93,12 +90,51 @@
   font-weight: 800;
 }
 
+.cardPreview {
+  position: relative;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid #d8e8f7;
+  background: #f4fafe;
+}
+
+.cardBody {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 6px;
+  align-content: start;
+  padding: 0 4px 4px;
+}
+
 .card h3 {
-  margin: 10px 0 8px;
+  margin: 0;
+  padding-right: 120px;
 }
 
 .card p {
-  margin: 0 0 10px;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.tagsTopRight {
+  position: absolute;
+  top: 2px;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  max-width: 118px;
+}
+
+.tagsTopRight span {
+  background: #f9edff;
+  border: 1px solid #e6d2f0;
+  border-radius: 999px;
+  padding: 2px 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
 }
 
 .tags {
@@ -122,8 +158,9 @@
   background: #ffb889;
   border: 2px solid #f8a46a;
   border-radius: 999px;
-  padding: 8px 14px;
+  padding: 7px 12px;
   font-weight: 800;
+  width: fit-content;
 }
 
 .gameBack {
@@ -137,6 +174,74 @@
   border-radius: 999px;
   padding: 8px 14px;
   font-weight: 800;
+}
+
+.filterWrap {
+  position: relative;
+}
+
+.filterToggle {
+  border: 2px solid #b7dfbb;
+  background: #d8f1da;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.filterPanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(320px, 86vw);
+  background: #fffefb;
+  border: 2px solid #d9c8f0;
+  border-radius: 14px;
+  box-shadow: 0 14px 24px #8f6a5224;
+  padding: 10px;
+  z-index: 20;
+}
+
+.filterPanel p {
+  margin: 0 0 6px;
+  font-weight: 800;
+}
+
+.filterOptions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.filterOptions label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f6f8ff;
+  border: 1px solid #d2daf8;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.clearFilters {
+  border: 2px solid #b7dfbb;
+  background: #d8f1da;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.empty {
+  margin: 0;
+  background: #fffefb;
+  border: 2px dashed #d9c8f0;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 700;
 }
 
 @media (max-width: 700px) {
