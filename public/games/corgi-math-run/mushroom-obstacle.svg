@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140" viewBox="0 0 140 140" role="img" aria-label="Mushroom obstacle">
+  <ellipse cx="70" cy="126" rx="32" ry="10" fill="#000" opacity=".12"/>
+  <rect x="58" y="72" width="24" height="48" rx="8" fill="#F4E2CF"/>
+  <ellipse cx="70" cy="62" rx="50" ry="40" fill="#FF5252"/>
+  <ellipse cx="70" cy="62" rx="50" ry="40" fill="#FF8A80" opacity=".45"/>
+  <circle cx="48" cy="54" r="8" fill="#FFF" opacity=".86"/>
+  <circle cx="72" cy="46" r="7" fill="#FFF" opacity=".86"/>
+  <circle cx="89" cy="60" r="6" fill="#FFF" opacity=".86"/>
+</svg>

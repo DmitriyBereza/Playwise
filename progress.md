@@ -229,3 +229,74 @@ Implemented:
 
 Validation:
 - `npm run build` passed.
+
+Follow-up prompt: check Figma-generated assets for corgi game and utilize needed ones.
+
+Skills used:
+- `game-builder` (game module integration)
+- `figma-implement-design` (Figma MCP source inspection)
+
+Implemented:
+- Connected to Figma MCP and inspected Make file `FFTrIE9GtT1Q4220x25Q4d`.
+- Since Make file contains mixed Unsplash placeholders + vector snippets, reused the reliable vector assets from source and moved them into project-local SVGs.
+- Added new local assets:
+  - `public/games/corgi-math-run/corgi-character.svg`
+  - `public/games/corgi-math-run/mushroom-obstacle.svg`
+  - `public/games/corgi-math-run/forest-backdrop.svg`
+- Updated game scene to use those assets:
+  - Corgi sprite source switched to the new Figma-derived character SVG.
+  - Obstacle switched from emoji to Figma-derived mushroom SVG.
+  - Track background switched from primitive gradients/shapes to Figma-derived forest backdrop SVG.
+- Updated game documentation:
+  - `games/corgi-math-run/GAME_INFO.txt` now includes the Figma asset integration note.
+
+Validation:
+- `npm run build` passed.
+
+Follow-up prompt: missing visible scene assets in corgi game (cartoon tree, pine, bush, flowers) and obstacle visibility concerns.
+
+Implemented:
+- Added explicit scene decoration layer in `CorgiMathRunGame` with separate asset sprites for:
+  - cartoon tree
+  - pine tree variation
+  - simple bush
+  - decorative flowers
+- Enhanced obstacle visibility:
+  - kept mushroom obstacle
+  - added wooden log base under mushroom
+  - raised obstacle z-index and refined position.
+- Added new local assets:
+  - `public/games/corgi-math-run/cartoon-tree.svg`
+  - `public/games/corgi-math-run/pine-tree.svg`
+  - `public/games/corgi-math-run/simple-bush.svg`
+  - `public/games/corgi-math-run/decorative-flowers.svg`
+  - `public/games/corgi-math-run/wooden-log.svg`
+
+Validation:
+- `npm run build` passed.
+
+Follow-up prompt: fully replace old graphics with Figma-based ones, add visible finish spot, place corgi on ground, and add multi-layer parallax.
+
+Implemented:
+- Rebuilt `corgi-math-run` scene with full Figma-style asset composition (removed reliance on legacy primitive cloud/tree/road styling).
+- Added 3-layer parallax scene:
+  - far background (scrolling forest backdrop)
+  - mid layer (cartoon + pine trees)
+  - front layer (bushes + flowers)
+  - plus dedicated ground path layer.
+- Added visible finish zone:
+  - race finish line asset
+  - finish spot (pile of bones) asset
+- Improved obstacle visibility:
+  - obstacle now appears before finish zone with stronger layering.
+- Grounded the corgi visually:
+  - lowered character position
+  - added dedicated shadow sprite.
+- New assets:
+  - `public/games/corgi-math-run/race-finish-line.svg`
+  - `public/games/corgi-math-run/pile-of-bones.svg`
+  - `public/games/corgi-math-run/ground-path.svg`
+  - `public/games/corgi-math-run/corgi-shadow.svg`
+
+Validation:
+- `npm run build` passed.

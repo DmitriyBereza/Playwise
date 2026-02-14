@@ -37,3 +37,9 @@ Main files:
 - `games/corgi-math-run/corgiMathRun.module.css`
 - `app/games/corgi-math-run/page.js`
 - `public/games/corgi-runner.svg`
+
+Figma asset integration:
+- Integrated vector assets adapted from Figma Make source (`FFTrIE9GtT1Q4220x25Q4d`) into local files:
+  - `public/games/corgi-math-run/corgi-character.svg`
+  - `public/games/corgi-math-run/mushroom-obstacle.svg`
+  - `public/games/corgi-math-run/forest-backdrop.svg`

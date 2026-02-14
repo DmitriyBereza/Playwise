@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="80" viewBox="0 0 150 80" role="img" aria-label="Wooden log obstacle">
+  <ellipse cx="75" cy="66" rx="58" ry="10" fill="#000" opacity=".14"/>
+  <rect x="16" y="26" width="118" height="34" rx="17" fill="#A16B3A"/>
+  <rect x="22" y="32" width="106" height="22" rx="11" fill="#8C552E"/>
+  <ellipse cx="32" cy="43" rx="8" ry="8" fill="#C48B58"/>
+  <ellipse cx="118" cy="43" rx="8" ry="8" fill="#C48B58"/>
+  <path d="M38 42 C50 34, 64 50, 80 42 C92 36, 102 47, 112 42" stroke="#6D3F1E" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

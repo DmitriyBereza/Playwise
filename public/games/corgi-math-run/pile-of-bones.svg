@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="140" height="120" viewBox="0 0 140 120" role="img" aria-label="Finish spot pile of bones">
+  <g transform="translate(70,44) rotate(18)">
+    <ellipse cx="-24" cy="0" rx="11" ry="14" fill="#F5E6D3"/>
+    <ellipse cx="24" cy="0" rx="11" ry="14" fill="#F5E6D3"/>
+    <rect x="-18" y="-7" width="36" height="14" rx="7" fill="#F5E6D3"/>
+  </g>
+  <g transform="translate(70,62) rotate(-14)">
+    <ellipse cx="-24" cy="0" rx="11" ry="14" fill="#E8D4B8"/>
+    <ellipse cx="24" cy="0" rx="11" ry="14" fill="#E8D4B8"/>
+    <rect x="-18" y="-7" width="36" height="14" rx="7" fill="#E8D4B8"/>
+  </g>
+  <g transform="translate(70,80) rotate(6)">
+    <ellipse cx="-24" cy="0" rx="11" ry="14" fill="#F5E6D3"/>
+    <ellipse cx="24" cy="0" rx="11" ry="14" fill="#F5E6D3"/>
+    <rect x="-18" y="-7" width="36" height="14" rx="7" fill="#F5E6D3"/>
+  </g>
+</svg>

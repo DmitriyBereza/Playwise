@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="90" height="170" viewBox="0 0 90 170" role="img" aria-label="Race finish line">
+  <rect x="14" y="12" width="7" height="146" fill="#3A332C"/>
+  <g>
+    <rect x="21" y="12" width="10" height="10" fill="#FFF"/>
+    <rect x="31" y="12" width="10" height="10" fill="#111"/>
+    <rect x="41" y="12" width="10" height="10" fill="#FFF"/>
+    <rect x="51" y="12" width="10" height="10" fill="#111"/>
+    <rect x="61" y="12" width="10" height="10" fill="#FFF"/>
+    <rect x="71" y="12" width="8" height="10" fill="#111"/>
+
+    <rect x="21" y="22" width="10" height="10" fill="#111"/>
+    <rect x="31" y="22" width="10" height="10" fill="#FFF"/>
+    <rect x="41" y="22" width="10" height="10" fill="#111"/>
+    <rect x="51" y="22" width="10" height="10" fill="#FFF"/>
+    <rect x="61" y="22" width="10" height="10" fill="#111"/>
+    <rect x="71" y="22" width="8" height="10" fill="#FFF"/>
+
+    <rect x="21" y="32" width="10" height="10" fill="#FFF"/>
+    <rect x="31" y="32" width="10" height="10" fill="#111"/>
+    <rect x="41" y="32" width="10" height="10" fill="#FFF"/>
+    <rect x="51" y="32" width="10" height="10" fill="#111"/>
+    <rect x="61" y="32" width="10" height="10" fill="#FFF"/>
+    <rect x="71" y="32" width="8" height="10" fill="#111"/>
+
+    <rect x="21" y="42" width="10" height="10" fill="#111"/>
+    <rect x="31" y="42" width="10" height="10" fill="#FFF"/>
+    <rect x="41" y="42" width="10" height="10" fill="#111"/>
+    <rect x="51" y="42" width="10" height="10" fill="#FFF"/>
+    <rect x="61" y="42" width="10" height="10" fill="#111"/>
+    <rect x="71" y="42" width="8" height="10" fill="#FFF"/>
+  </g>
+</svg>

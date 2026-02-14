@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="360" height="80" viewBox="0 0 360 80" role="img" aria-label="Ground path layer">
+  <rect width="360" height="80" fill="#F3DFC6"/>
+  <path d="M0 32 H360" stroke="#D9B791" stroke-width="3" stroke-dasharray="16 16" opacity=".72"/>
+  <path d="M0 50 H360" stroke="#D9B791" stroke-width="2" stroke-dasharray="10 18" opacity=".55"/>
+</svg>

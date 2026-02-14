@@ -63,12 +63,88 @@
 
 .track {
   position: relative;
-  height: 240px;
+  height: 480px;
   border: 2px solid #d8e8f7;
   border-radius: 18px;
   overflow: hidden;
-  background: linear-gradient(180deg, #d8f4ff 0%, #e7ffe8 48%, #fef7e9 48%, #f7ead9 100%);
+  background: linear-gradient(180deg, #dff4ff 0%, #e5f9ff 34%, #d7f2ce 55%, #c7e7b7 66%, #b7d89f 100%);
   transition: box-shadow 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.parallaxLayer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.farLayer {
+  z-index: 1;
+  background:
+    radial-gradient(circle at 12% 42%, #ffffffcf 0 42px, transparent 43px),
+    radial-gradient(circle at 28% 30%, #ffffffbf 0 36px, transparent 37px),
+    radial-gradient(circle at 56% 38%, #ffffffcf 0 40px, transparent 41px),
+    radial-gradient(circle at 78% 28%, #ffffffbd 0 34px, transparent 35px),
+    radial-gradient(ellipse 110px 26px at 8% 82%, #b8e8be 0 70%, transparent 71%),
+    radial-gradient(ellipse 120px 28px at 30% 84%, #b4e1b7 0 70%, transparent 71%),
+    radial-gradient(ellipse 112px 26px at 52% 82%, #b8e8be 0 70%, transparent 71%),
+    radial-gradient(ellipse 124px 30px at 74% 84%, #b4e1b7 0 70%, transparent 71%),
+    radial-gradient(ellipse 104px 24px at 95% 82%, #b8e8be 0 70%, transparent 71%),
+    linear-gradient(180deg, transparent 0%, transparent 58%, #c5e7b0 59%, #b6d89f 100%);
+  opacity: 0.9;
+}
+
+.midLayer {
+  z-index: 2;
+  left: -32%;
+  right: -32%;
+}
+
+.frontLayer {
+  z-index: 3;
+  left: -36%;
+  right: -36%;
+}
+
+.groundLayer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px;
+  height: 148px;
+  z-index: 4;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 140px 14px at 8% 16%, #86b97855 0 62%, transparent 63%),
+    radial-gradient(ellipse 150px 14px at 28% 16%, #86b97855 0 62%, transparent 63%),
+    radial-gradient(ellipse 150px 14px at 48% 16%, #86b97855 0 62%, transparent 63%),
+    radial-gradient(ellipse 150px 14px at 68% 16%, #86b97855 0 62%, transparent 63%),
+    radial-gradient(ellipse 150px 14px at 88% 16%, #86b97855 0 62%, transparent 63%),
+    linear-gradient(180deg, #cfb18c 0%, #bb8d60 48%, #a6784f 100%);
+  border-top: 4px solid #8aa35e;
+  box-shadow: inset 0 8px 0 #d9bf9d66;
+}
+
+.decor {
+  position: absolute;
+  user-select: none;
+  pointer-events: none;
+}
+
+.midTree {
+  bottom: 146px;
+  transform: translateX(-50%);
+  opacity: 0.94;
+}
+
+.frontBush {
+  bottom: 104px;
+  transform: translateX(-50%);
+  opacity: 0.97;
+}
+
+.frontFlowers {
+  bottom: 92px;
+  transform: translateX(-50%);
 }
 
 .trackCorrect {
@@ -80,57 +156,16 @@
   animation: shake 0.4s ease;
 }
 
-.cloud {
-  position: absolute;
-  background: #ffffffcc;
-  border-radius: 999px;
-}
-
-.cloudA {
-  width: 120px;
-  height: 28px;
-  top: 28px;
-  left: 54px;
-}
-
-.cloudB {
-  width: 92px;
-  height: 24px;
-  top: 58px;
-  right: 84px;
-}
-
-.trees {
-  position: absolute;
-  inset: 0;
-  opacity: 0.72;
-  background-image: radial-gradient(circle at 10% 44%, #7bc285 0, #7bc285 24px, transparent 26px),
-    radial-gradient(circle at 22% 39%, #95d99f 0, #95d99f 20px, transparent 22px),
-    radial-gradient(circle at 39% 45%, #7bc285 0, #7bc285 23px, transparent 25px),
-    radial-gradient(circle at 61% 37%, #95d99f 0, #95d99f 20px, transparent 22px),
-    radial-gradient(circle at 78% 44%, #7bc285 0, #7bc285 24px, transparent 26px),
-    radial-gradient(circle at 90% 40%, #95d99f 0, #95d99f 20px, transparent 22px);
-}
-
-.road {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 30px;
-  height: 56px;
-  background: linear-gradient(90deg, #f2ddc4, #f7e9d2);
-  border-top: 2px dashed #d8bea3;
-}
-
 .progressLine {
   position: absolute;
   left: 12px;
   right: 12px;
-  bottom: 12px;
+  bottom: 10px;
   height: 10px;
   border-radius: 999px;
   background: #f0d8c0;
   overflow: hidden;
+  z-index: 9;
 }
 
 .progressFill {
@@ -142,10 +177,19 @@
 
 .corgiWrap {
   position: absolute;
-  bottom: 64px;
+  bottom: 124px;
   transform: translateX(-50%);
   filter: drop-shadow(0 3px 2px #00000026);
   transition: left 0.2s ease-out;
+  z-index: 10;
+}
+
+.corgiShadow {
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  transform: translateX(-50%);
+  opacity: 0.62;
 }
 
 .corgiCelebrate {
@@ -154,9 +198,54 @@
 
 .obstacle {
   position: absolute;
-  right: 52px;
-  bottom: 70px;
-  font-size: 2rem;
+  bottom: 120px;
+  width: 100px;
+  height: 86px;
+  display: grid;
+  place-items: center;
+  transform: translateX(-50%);
+  z-index: 11;
+}
+
+.obstacleBase {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100px;
+  height: auto;
+  opacity: 0.94;
+}
+
+.obstacleImage {
+  width: 74px;
+  height: auto;
+  transform: translateY(-10px);
+  filter: drop-shadow(0 2px 2px #0000002a);
+}
+
+.finishSpot {
+  position: absolute;
+  bottom: 116px;
+  transform: translateX(-50%);
+  z-index: 7;
+}
+
+.finishBones {
+  width: 82px;
+  height: auto;
+  filter: drop-shadow(0 2px 2px #00000023);
+}
+
+.finishLine {
+  position: absolute;
+  bottom: 124px;
+  transform: translateX(-50%);
+  z-index: 8;
+}
+
+.finishFlag {
+  width: 62px;
+  height: auto;
 }
 
 .menu,
@@ -310,4 +399,3 @@
     grid-template-columns: 1fr;
   }
 }
-

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520" role="img" aria-label="Forest backdrop">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#DFF4FF"/>
+      <stop offset="70%" stop-color="#E9FFE7"/>
+      <stop offset="100%" stop-color="#FFF2DE"/>
+    </linearGradient>
+    <linearGradient id="path" x1="0" x2="1" y1="0" y2="0">
+      <stop offset="0%" stop-color="#F1D8BE"/>
+      <stop offset="100%" stop-color="#F8E8D0"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="520" fill="url(#sky)"/>
+
+  <g opacity=".8">
+    <ellipse cx="130" cy="230" rx="68" ry="76" fill="#5DAE63"/>
+    <ellipse cx="190" cy="238" rx="64" ry="72" fill="#69BC6F"/>
+    <rect x="152" y="272" width="16" height="72" rx="6" fill="#8B5A2E"/>
+  </g>
+
+  <g opacity=".82">
+    <ellipse cx="450" cy="236" rx="68" ry="78" fill="#5DAE63"/>
+    <ellipse cx="514" cy="246" rx="60" ry="68" fill="#69BC6F"/>
+    <rect x="478" y="280" width="15" height="70" rx="6" fill="#8B5A2E"/>
+  </g>
+
+  <g opacity=".78">
+    <ellipse cx="790" cy="226" rx="70" ry="80" fill="#5DAE63"/>
+    <ellipse cx="856" cy="242" rx="62" ry="70" fill="#69BC6F"/>
+    <rect x="822" y="280" width="16" height="72" rx="6" fill="#8B5A2E"/>
+  </g>
+
+  <g opacity=".74">
+    <ellipse cx="1065" cy="240" rx="66" ry="74" fill="#5DAE63"/>
+    <ellipse cx="1124" cy="248" rx="58" ry="66" fill="#69BC6F"/>
+    <rect x="1094" y="282" width="14" height="66" rx="6" fill="#8B5A2E"/>
+  </g>
+
+  <g opacity=".88">
+    <ellipse cx="90" cy="326" rx="56" ry="40" fill="#4A7C28"/>
+    <ellipse cx="150" cy="320" rx="54" ry="38" fill="#5A9030"/>
+    <ellipse cx="210" cy="326" rx="52" ry="38" fill="#4A7C28"/>
+    <ellipse cx="515" cy="326" rx="56" ry="40" fill="#4A7C28"/>
+    <ellipse cx="576" cy="320" rx="52" ry="38" fill="#5A9030"/>
+    <ellipse cx="632" cy="326" rx="50" ry="36" fill="#4A7C28"/>
+    <ellipse cx="930" cy="326" rx="58" ry="40" fill="#4A7C28"/>
+    <ellipse cx="994" cy="322" rx="52" ry="38" fill="#5A9030"/>
+    <ellipse cx="1054" cy="328" rx="48" ry="34" fill="#4A7C28"/>
+  </g>
+
+  <rect y="360" width="1200" height="160" fill="url(#path)"/>
+  <path d="M0 410 H1200" stroke="#D9B791" stroke-width="4" stroke-dasharray="18 18" opacity=".7"/>
+</svg>

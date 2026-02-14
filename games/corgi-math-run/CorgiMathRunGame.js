@@ -79,7 +79,17 @@ export default function CorgiMathRunGame() {
 
   const attemptsLeft = MAX_WRONG_ATTEMPTS - wrongAttempts;
   const progressPercent = targetCount ? Math.min(100, (score / targetCount) * 100) : 0;
-  const corgiX = Math.min(86, 10 + progressPercent * 0.72);
+  const finishX = 90;
+  const baseCorgiX = Math.min(76, 8 + progressPercent * 0.68);
+  const corgiX = phase === 'won' ? 84 : baseCorgiX;
+  const nextTargetRatio = Math.min(1, (score + 1) / Math.max(1, targetCount));
+  const obstacleX = phase === 'playing' ? Math.min(finishX - 9, 14 + nextTargetRatio * (finishX - 28)) : finishX - 8;
+  const farShift = Math.round(progressPercent * 0.35);
+  const midShift = Math.round(progressPercent * 0.65);
+  const frontShift = Math.round(progressPercent * 0.95);
+  const midDecorPositions = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120];
+  const frontBushPositions = [2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 112];
+  const flowerPositions = [6, 18, 30, 44, 58, 70, 84, 98, 114];
 
   useEffect(() => {
     setStatus(t('corgiMathGame.status.selectAndStart'));
@@ -219,17 +229,74 @@ export default function CorgiMathRunGame() {
         <p className={styles.status}>{status}</p>
 
         <div className={`${styles.track} ${feedback === 'correct' ? styles.trackCorrect : ''} ${feedback === 'wrong' ? styles.trackWrong : ''}`}>
-          <div className={`${styles.cloud} ${styles.cloudA}`} />
-          <div className={`${styles.cloud} ${styles.cloudB}`} />
-          <div className={styles.trees} />
-          <div className={styles.road} />
+          <div className={`${styles.parallaxLayer} ${styles.farLayer}`} style={{ backgroundPositionX: `-${farShift}px` }} aria-hidden="true" />
+          <div className={`${styles.parallaxLayer} ${styles.midLayer}`} style={{ transform: `translateX(-${midShift}px)` }} aria-hidden="true">
+            {midDecorPositions.map((left, idx) => (
+              <Image
+                key={`mid-tree-${left}`}
+                src={idx % 2 === 0 ? '/games/corgi-math-run/cartoon-tree.svg' : '/games/corgi-math-run/pine-tree.svg'}
+                alt=""
+                width={idx % 2 === 0 ? 108 : 98}
+                height={idx % 2 === 0 ? 154 : 160}
+                className={`${styles.decor} ${styles.midTree}`}
+                style={{ left: `${left}%` }}
+              />
+            ))}
+          </div>
+          <div className={`${styles.parallaxLayer} ${styles.frontLayer}`} style={{ transform: `translateX(-${frontShift}px)` }} aria-hidden="true">
+            {frontBushPositions.map((left, idx) => (
+              <Image
+                key={`front-bush-${left}`}
+                src="/games/corgi-math-run/simple-bush.svg"
+                alt=""
+                width={idx % 2 === 0 ? 136 : 126}
+                height={idx % 2 === 0 ? 78 : 72}
+                className={`${styles.decor} ${styles.frontBush}`}
+                style={{ left: `${left}%` }}
+              />
+            ))}
+            {flowerPositions.map((left, idx) => (
+              <Image
+                key={`front-flowers-${left}`}
+                src="/games/corgi-math-run/decorative-flowers.svg"
+                alt=""
+                width={idx % 2 === 0 ? 98 : 90}
+                height={idx % 2 === 0 ? 62 : 56}
+                className={`${styles.decor} ${styles.frontFlowers}`}
+                style={{ left: `${left}%` }}
+              />
+            ))}
+          </div>
+          <div className={styles.groundLayer} aria-hidden="true" />
           <div className={styles.progressLine}>
             <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
           </div>
-          <div className={`${styles.corgiWrap} ${feedback === 'correct' ? styles.corgiCelebrate : ''}`} style={{ left: `${corgiX}%` }}>
-            <Image src="/games/corgi-runner.svg" alt="Corgi" width={92} height={74} priority />
+          <div className={styles.finishSpot} aria-hidden="true" style={{ left: `${finishX - 3}%` }}>
+            <Image src="/games/corgi-math-run/pile-of-bones.svg" alt="" width={82} height={74} className={styles.finishBones} />
           </div>
-          <div className={styles.obstacle}>🪵</div>
+          <div className={styles.finishLine} aria-hidden="true" style={{ left: `${finishX}%` }}>
+            <Image src="/games/corgi-math-run/race-finish-line.svg" alt="" width={58} height={132} className={styles.finishFlag} />
+          </div>
+          <div className={`${styles.corgiWrap} ${feedback === 'correct' ? styles.corgiCelebrate : ''}`} style={{ left: `${corgiX}%` }}>
+            <Image src="/games/corgi-math-run/corgi-shadow.svg" alt="" width={86} height={20} className={styles.corgiShadow} />
+            <Image src="/games/corgi-math-run/corgi-character.svg" alt="Corgi" width={108} height={82} priority />
+          </div>
+          <div className={styles.obstacle} style={{ left: `${obstacleX}%` }}>
+            <Image
+              src="/games/corgi-math-run/wooden-log.svg"
+              alt=""
+              width={100}
+              height={54}
+              className={styles.obstacleBase}
+            />
+            <Image
+              src="/games/corgi-math-run/mushroom-obstacle.svg"
+              alt="Obstacle"
+              width={74}
+              height={74}
+              className={styles.obstacleImage}
+            />
+          </div>
         </div>
 
         {phase === 'idle' && (

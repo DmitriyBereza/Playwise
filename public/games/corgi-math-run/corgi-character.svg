@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="180" viewBox="0 0 240 180" role="img" aria-label="Corgi character">
+  <ellipse cx="124" cy="118" rx="56" ry="38" fill="#F59E42"/>
+  <ellipse cx="134" cy="124" rx="30" ry="20" fill="#FFF5E8"/>
+  <circle cx="108" cy="74" r="36" fill="#F59E42"/>
+  <ellipse cx="88" cy="52" rx="14" ry="24" fill="#D97828"/>
+  <ellipse cx="120" cy="52" rx="14" ry="24" fill="#D97828"/>
+  <circle cx="98" cy="72" r="5" fill="#2F2C2C"/>
+  <circle cx="115" cy="72" r="5" fill="#2F2C2C"/>
+  <circle cx="108" cy="84" r="4" fill="#2F2C2C"/>
+  <path d="M102 90 Q108 95 114 90" stroke="#2F2C2C" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <rect x="95" y="142" width="13" height="25" rx="6.5" fill="#F59E42"/>
+  <rect x="120" y="142" width="13" height="25" rx="6.5" fill="#F59E42"/>
+  <ellipse cx="175" cy="112" rx="12" ry="18" fill="#F59E42" transform="rotate(24 175 112)"/>
+</svg>
