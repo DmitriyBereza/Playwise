@@ -10,5 +10,7 @@ Each game lives in its own folder so it can be edited/tested independently.
 
 - `games/corgi-math-run/CorgiMathRunGame.js`
 - `games/corgi-math-run/corgiMathRun.module.css`
+- `games/plane-forest-run/PlaneForestRunGame.js`
+- `games/plane-forest-run/planeForestRun.module.css`
 - `games/typing-balloons/TypingBalloonsGame.js`
 - `games/typing-balloons/typingBalloons.module.css`

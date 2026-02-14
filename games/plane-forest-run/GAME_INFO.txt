@@ -1,0 +1,31 @@
+Game: Plane Forest Run
+Audience: Kids 3-6
+
+Purpose:
+- Build quick reaction and directional control.
+- Practice short planning and obstacle avoidance.
+- Keep play calm and readable with simple visual cues.
+
+Core loop:
+1) Press Start.
+2) Plane moves left-to-right through random obstacle map.
+3) Child uses on-screen arrow buttons (and keyboard arrows optional) to avoid obstacles.
+4) Pass 3 checkpoints before finish.
+5) Collision => game over; otherwise finish and score.
+
+Map and checkpoints:
+- Obstacles are randomly generated each run.
+- 3 checkpoints at 25%, 50%, 75% of map distance.
+
+Scoring:
+- Score increases by distance and passed obstacles/checkpoints.
+- High score saved in localStorage key `planeForestRunHighScoreV1`.
+
+Testing hooks:
+- `window.render_game_to_text()` provides concise game state JSON.
+- `window.advanceTime(ms)` advances deterministic simulation steps.
+
+Main files:
+- `games/plane-forest-run/PlaneForestRunGame.js`
+- `games/plane-forest-run/planeForestRun.module.css`
+- `app/games/plane-forest-run/page.js`

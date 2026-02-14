@@ -83,8 +83,9 @@
   aspect-ratio: 1 / 1;
   width: 220px;
   display: grid;
-  grid-template-rows: 44% 1fr;
+  grid-template-rows: 38% 1fr;
   gap: 10px;
+  overflow: hidden;
 }
 
 .badge {
@@ -114,44 +115,61 @@
 }
 
 .cardBody {
-  position: relative;
   display: grid;
-  grid-template-rows: auto auto 1fr auto;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
   gap: 6px;
   align-content: start;
   padding: 0 4px 4px;
+  overflow: hidden;
+}
+
+.metaRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 6px;
 }
 
 .card h3 {
   margin: 0;
-  padding-right: 96px;
-  font-size: 1.02rem;
+  font-size: 0.96rem;
+  line-height: 1.15;
 }
 
 .card p {
   margin: 0;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   line-height: 1.25;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .tagsTopRight {
-  position: absolute;
-  top: 2px;
-  right: 0;
   display: flex;
-  gap: 4px;
   flex-wrap: wrap;
+  gap: 3px;
   justify-content: flex-end;
-  max-width: 92px;
+  max-width: 55%;
+  max-height: 42px;
+  overflow: hidden;
 }
 
 .tagsTopRight span {
+  display: inline-block;
   background: #f9edff;
   border: 1px solid #e6d2f0;
   border-radius: 999px;
   padding: 2px 6px;
   font-size: 0.64rem;
   font-weight: 700;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  text-align: left;
 }
 
 .tags {
@@ -179,6 +197,7 @@
   font-weight: 800;
   width: fit-content;
   font-size: 0.84rem;
+  align-self: start;
 }
 
 .gameBack {
@@ -294,7 +313,6 @@
 
   .card h3 {
     font-size: 0.9rem;
-    padding-right: 80px;
   }
 
   .card p {
@@ -302,7 +320,11 @@
   }
 
   .badge {
-    font-size: 0.7rem;
+    font-size: 0.66rem;
     padding: 3px 8px;
+  }
+
+  .tagsTopRight {
+    max-width: 58%;
   }
 }

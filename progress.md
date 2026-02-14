@@ -130,3 +130,102 @@ Gameplay behavior:
 
 Validation:
 - `npm run build` passed.
+
+Follow-up prompt: improve Corgi Math Run UI/feedback and gameplay flow (actual corgi, visible correct/wrong effects, wrong option lockout, start button + difficulty levels, non-repeating equations, progressive option count, centered equation/answers).
+
+Skills used:
+- `game-builder` (primary)
+- `frontend-design` (surroundings + stronger visual feedback)
+
+Implemented changes in Corgi Math Run:
+- Added start menu with difficulty selection + explicit Start button.
+  - easy = 10 equations
+  - middle = 15 equations
+  - complex = 20 equations
+- Added no-repeat equation generation per run using used-equation key set.
+- Added progressive suggestion count near finish:
+  - early 3 options, mid 4, near finish 5.
+- Enforced unique options for each equation (no duplicated answers).
+- Added wrong-answer lockout per question:
+  - chosen wrong option becomes disabled.
+- Added visible feedback:
+  - correct: green highlight + corgi jump
+  - wrong: red highlight + shake effect
+- Added richer scene styling (clouds/trees/track) and real corgi asset.
+- Centered equation and answer options in quiz panel.
+- Added finish state (win) and menu return action.
+- Updated translations (UA/EN) for new game states/labels in `lib/i18n/messages.js`.
+- Updated game context doc: `games/corgi-math-run/GAME_INFO.txt`.
+
+Validation:
+- `npm run build` passed.
+
+Follow-up prompt: create new plane game using develop-web-game skill (left-to-right flight, avoid obstacles with on-screen arrows, random map, 3 checkpoints before finish, score system).
+
+Skills used:
+- `develop-web-game` (primary, workflow followed)
+- Project-local `game-builder` conventions for module structure
+- NOTE: direct Figma integration is not available in this runtime; implemented game and assets in code.
+
+Implemented:
+- New game route: `app/games/plane-forest-run/page.js`
+- New game module: `games/plane-forest-run/PlaneForestRunGame.js`
+- New game styles: `games/plane-forest-run/planeForestRun.module.css`
+- New game preview image: `public/games/plane-forest-run-preview.svg`
+- New game context doc: `games/plane-forest-run/GAME_INFO.txt`
+- Added plane sprite asset: `public/games/corgi-runner.svg` (used as in-game plane icon file replacement context from previous prompt)
+- Registered new game in `games/catalog.js`
+- Added i18n keys UA/EN in `lib/i18n/messages.js`:
+  - game title/description
+  - skill label `skills.flight`
+  - full in-game text/statuses
+
+Gameplay behavior:
+- Plane auto-advances left-to-right over a random obstacle map.
+- On-screen arrow controls (up/down/left/right) and keyboard arrows.
+- 3 checkpoints at 25/50/75% of map distance.
+- Collision triggers game over.
+- Finish at map end.
+- Score from distance + passed obstacles + checkpoints.
+- High score persisted in localStorage (`planeForestRunHighScoreV1`).
+- Testing hooks for develop-web-game:
+  - `window.render_game_to_text()`
+  - `window.advanceTime(ms)`
+
+Validation:
+- `npm run build` passed.
+- develop-web-game Playwright client run attempted and blocked by environment issue:
+  - `ERR_MODULE_NOT_FOUND: playwright` from `/Users/DBEREZA/.codex/skills/develop-web-game/scripts/web_game_playwright_client.js`.
+
+Correction note:
+- Plane game uses canvas-drawn plane graphics; no standalone plane sprite asset file was introduced for gameplay.
+
+Follow-up prompt (plane game adjustments):
+- remove backward/forward controls, keep only up/down
+- support up/down arrow keys
+- if crashed after checkpoint, respawn from latest checkpoint
+
+Implemented:
+- Plane movement is now vertical-only (up/down), fixed x position.
+- Removed left/right control buttons from UI.
+- Keyboard handling remains and now uses only ArrowUp/ArrowDown.
+- Added checkpoint respawn mechanic:
+  - stores latest checkpoint distance
+  - on collision after at least one checkpoint, returns player to checkpoint instead of game over
+  - adds short respawn grace timer to avoid immediate re-collision
+- Added respawn status text in UA/EN translations.
+- Added `respawn_timer` to `render_game_to_text()` payload for test visibility.
+
+Validation:
+- `npm run build` passed.
+
+Follow-up prompt: browser moves together with plane; stop propagation/scroll while controlling.
+
+Implemented:
+- Prevented default browser scrolling for `ArrowUp`/`ArrowDown` in `keydown` and `keyup` handlers.
+- Registered keyboard listeners with `{ passive: false }`.
+- Prevented default on on-screen control pointer/touch events for up/down buttons.
+- Added `touch-action: none` to game canvas and control buttons to stop gesture scroll during interaction.
+
+Validation:
+- `npm run build` passed.

@@ -1,5 +1,15 @@
 export const gamesCatalog = [
   {
+    slug: 'plane-forest-run',
+    titleKey: 'games.planeForestRun.title',
+    descriptionKey: 'games.planeForestRun.description',
+    ageKey: 'ages.3plus',
+    ageGroup: '3plus',
+    image: '/games/plane-forest-run-preview.svg',
+    skills: ['skills.flight', 'skills.focus'],
+    path: '/games/plane-forest-run',
+  },
+  {
     slug: 'corgi-math-run',
     titleKey: 'games.corgiMathRun.title',
     descriptionKey: 'games.corgiMathRun.description',

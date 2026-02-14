@@ -1,0 +1,43 @@
+<svg width="280" height="200" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <defs>
+    <linearGradient id="fur" x1="52" y1="50" x2="228" y2="170" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7A35D"/>
+      <stop offset="1" stop-color="#C98247"/>
+    </linearGradient>
+    <linearGradient id="light" x1="94" y1="86" x2="175" y2="160" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF6E8"/>
+      <stop offset="1" stop-color="#FFEAD0"/>
+    </linearGradient>
+  </defs>
+
+  <ellipse cx="136" cy="108" rx="82" ry="47" fill="url(#fur)"/>
+  <ellipse cx="192" cy="88" rx="40" ry="35" fill="url(#fur)"/>
+  <ellipse cx="191" cy="96" rx="22" ry="18" fill="url(#light)"/>
+
+  <path d="M165 65L154 34L181 50L165 65Z" fill="#B86F3D"/>
+  <path d="M211 63L230 36L234 63L211 63Z" fill="#B86F3D"/>
+  <path d="M167 64L158 43L176 54L167 64Z" fill="#F3C18D"/>
+  <path d="M211 61L222 44L224 61L211 61Z" fill="#F3C18D"/>
+
+  <ellipse cx="200" cy="87" rx="5.2" ry="5.2" fill="#2E2118"/>
+  <ellipse cx="213" cy="95" rx="4.3" ry="3.7" fill="#2E2118"/>
+  <ellipse cx="214" cy="103" rx="6" ry="4" fill="#2E2118"/>
+
+  <path d="M171 108C174 115 180 119 188 119" stroke="#9D6035" stroke-width="3" stroke-linecap="round"/>
+  <ellipse cx="179" cy="103" rx="2.4" ry="2.4" fill="#CC7E8F"/>
+
+  <ellipse cx="88" cy="146" rx="16" ry="23" fill="#B86F3D"/>
+  <ellipse cx="121" cy="150" rx="17" ry="24" fill="#B86F3D"/>
+  <ellipse cx="151" cy="149" rx="17" ry="24" fill="#B86F3D"/>
+  <ellipse cx="183" cy="145" rx="16" ry="23" fill="#B86F3D"/>
+
+  <ellipse cx="88" cy="166" rx="13" ry="5" fill="#91562F" opacity="0.4"/>
+  <ellipse cx="121" cy="170" rx="13" ry="5" fill="#91562F" opacity="0.4"/>
+  <ellipse cx="151" cy="169" rx="13" ry="5" fill="#91562F" opacity="0.4"/>
+  <ellipse cx="183" cy="166" rx="13" ry="5" fill="#91562F" opacity="0.4"/>
+
+  <path d="M55 108C49 87 52 67 71 58" stroke="#B86F3D" stroke-width="13" stroke-linecap="round"/>
+  <path d="M57 108C52 89 54 73 68 66" stroke="#E7A35D" stroke-width="7" stroke-linecap="round"/>
+
+  <ellipse cx="142" cy="112" rx="50" ry="33" fill="url(#light)" opacity="0.95"/>
+</svg>

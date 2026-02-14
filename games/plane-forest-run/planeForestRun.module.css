@@ -1,0 +1,105 @@
+.page {
+  min-height: 100vh;
+}
+
+.card {
+  background: #fffefb;
+  border: 3px solid #e8dcff;
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 12px 24px #8f6a5230;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.head h1 {
+  margin: 0 0 6px;
+}
+
+.head p {
+  margin: 0;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.stats p {
+  margin: 0;
+  border: 2px solid #d8e8f7;
+  background: #f7fcff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 700;
+}
+
+.status {
+  margin: 10px 0;
+  font-weight: 700;
+}
+
+.canvas {
+  width: 100%;
+  max-width: 560px;
+  border: 2px solid #d8e8f7;
+  border-radius: 16px;
+  display: block;
+  touch-action: none;
+}
+
+.controls {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, 54px);
+  gap: 8px;
+}
+
+.controls button,
+.actions button {
+  border: 0;
+  border-radius: 12px;
+  background: #95c8ff;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.1rem;
+  min-height: 48px;
+  cursor: pointer;
+  touch-action: none;
+}
+
+.controls button:active,
+.actions button:active {
+  transform: translateY(1px);
+}
+
+.actions {
+  margin-top: 12px;
+}
+
+.actions button {
+  padding: 10px 14px;
+  background: #ffb889;
+  font-size: 0.98rem;
+}
+
+@media (max-width: 760px) {
+  .head {
+    flex-direction: column;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

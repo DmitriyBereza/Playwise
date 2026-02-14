@@ -120,11 +120,13 @@ export default function HomePage() {
                 />
               </div>
               <div className={styles.cardBody}>
-                <span className={styles.badge}>{t(game.ageKey)}</span>
-                <div className={styles.tagsTopRight}>
-                  {game.skills.map((skill) => (
-                    <span key={skill}>{t(skill)}</span>
-                  ))}
+                <div className={styles.metaRow}>
+                  <span className={styles.badge}>{t(game.ageKey)}</span>
+                  <div className={styles.tagsTopRight}>
+                    {game.skills.map((skill) => (
+                      <span key={skill}>{t(skill)}</span>
+                    ))}
+                  </div>
                 </div>
                 <h3>{t(game.titleKey)}</h3>
                 <p>{t(game.descriptionKey)}</p>
