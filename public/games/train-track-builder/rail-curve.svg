@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <!-- Curved wooden ties (arc paths along the curve) -->
+  <path d="M22,60 Q60,60 60,22" stroke="#A67C30" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <path d="M30,60 Q60,60 60,30" stroke="#A67C30" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M40,60 Q60,60 60,40" stroke="#A67C30" stroke-width="6" fill="none" stroke-linecap="round" opacity="0.7"/>
+  <!-- Tie shadows -->
+  <path d="M30,60 Q60,60 60,30" stroke="#8B6914" stroke-width="2" fill="none" opacity="0.3"/>
+  <!-- Outer iron rail: exits bottom at x=20, right at y=20 — matches straight left rail (center x=20) -->
+  <path d="M20,60 Q60,60 60,20" stroke="#5A5A5A" stroke-width="4" fill="none" stroke-linecap="butt"/>
+  <path d="M20,60 Q60,60 60,20" stroke="url(#curveRailGrad)" stroke-width="4" fill="none" stroke-linecap="butt"/>
+  <!-- Inner iron rail: exits bottom at x=40, right at y=40 — matches straight right rail (center x=40) -->
+  <path d="M40,60 Q60,60 60,40" stroke="#5A5A5A" stroke-width="4" fill="none" stroke-linecap="butt"/>
+  <path d="M40,60 Q60,60 60,40" stroke="url(#curveRailGrad)" stroke-width="4" fill="none" stroke-linecap="butt"/>
+  <defs>
+    <linearGradient id="curveRailGrad" x1="0" y1="0" x2="60" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+</svg>

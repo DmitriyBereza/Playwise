@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" fill="none">
+  <!-- Platform -->
+  <rect x="5" y="60" width="70" height="12" rx="3" fill="#A67C30"/>
+  <rect x="5" y="60" width="70" height="4" rx="2" fill="#C4956A"/>
+  <!-- Building -->
+  <rect x="15" y="22" width="50" height="40" rx="3" fill="#F5E6C8"/>
+  <rect x="15" y="22" width="50" height="40" rx="3" fill="url(#bldgGradB)"/>
+  <!-- Roof -->
+  <polygon points="10,24 40,6 70,24" fill="#D94040"/>
+  <polygon points="10,24 40,6 70,24" fill="url(#roofGradB)"/>
+  <!-- Windows -->
+  <rect x="22" y="32" width="12" height="12" rx="2" fill="#B8E4F8"/>
+  <rect x="46" y="32" width="12" height="12" rx="2" fill="#B8E4F8"/>
+  <!-- Door -->
+  <rect x="33" y="40" width="14" height="22" rx="2" fill="#8B6914"/>
+  <circle cx="44" cy="52" r="1.5" fill="#FFD93D"/>
+  <!-- Sign -->
+  <rect x="28" y="10" width="24" height="12" rx="3" fill="white" stroke="#D94040" stroke-width="1.5"/>
+  <text x="40" y="20" text-anchor="middle" font-size="10" font-weight="bold" fill="#D94040" font-family="sans-serif">B</text>
+  <!-- Flag -->
+  <line x1="68" y1="6" x2="68" y2="20" stroke="#555" stroke-width="1.5"/>
+  <polygon points="68,6 78,10 68,14" fill="#D94040"/>
+  <defs>
+    <linearGradient id="bldgGradB" x1="15" y1="22" x2="15" y2="62" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.15"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.08"/>
+    </linearGradient>
+    <linearGradient id="roofGradB" x1="40" y1="6" x2="40" y2="24" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.1"/>
+    </linearGradient>
+  </defs>
+</svg>

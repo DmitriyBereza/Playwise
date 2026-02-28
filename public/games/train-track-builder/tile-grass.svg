@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <rect width="60" height="60" fill="#7BC47F"/>
+  <!-- Grass texture -->
+  <path d="M5,55 Q6,48 7,55" stroke="#5FA663" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M15,52 Q16,44 17,52" stroke="#5FA663" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M30,56 Q31,50 32,56" stroke="#5FA663" stroke-width="1" fill="none" opacity="0.6"/>
+  <path d="M45,54 Q46,46 47,54" stroke="#5FA663" stroke-width="1" fill="none" opacity="0.5"/>
+  <path d="M55,53 Q56,47 57,53" stroke="#5FA663" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M10,20 Q11,14 12,20" stroke="#A8D8A0" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M40,15 Q41,9 42,15" stroke="#A8D8A0" stroke-width="0.8" fill="none" opacity="0.4"/>
+  <!-- Tiny flowers -->
+  <circle cx="22" cy="35" r="1.5" fill="#FFD93D" opacity="0.6"/>
+  <circle cx="48" cy="22" r="1.2" fill="#FF9EAA" opacity="0.5"/>
+</svg>

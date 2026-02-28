@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 60" fill="none">
+  <!-- Body -->
+  <rect x="10" y="15" width="55" height="28" rx="6" fill="#D94040"/>
+  <rect x="10" y="15" width="55" height="28" rx="6" fill="url(#bodyGrad)"/>
+  <!-- Cabin -->
+  <rect x="45" y="8" width="22" height="35" rx="4" fill="#C23030"/>
+  <rect x="49" y="12" width="14" height="10" rx="2" fill="#B8E4F8"/>
+  <rect x="49" y="12" width="14" height="10" rx="2" fill="url(#windowGrad)" opacity="0.5"/>
+  <!-- Chimney -->
+  <rect x="16" y="4" width="10" height="14" rx="2" fill="#4A4A4A"/>
+  <rect x="13" y="2" width="16" height="5" rx="2" fill="#5A5A5A"/>
+  <!-- Cowcatcher -->
+  <polygon points="2,43 10,35 10,43" fill="#FFD93D"/>
+  <!-- Yellow trim -->
+  <rect x="10" y="38" width="55" height="4" rx="1" fill="#FFD93D"/>
+  <!-- Wheels -->
+  <circle cx="22" cy="48" r="7" fill="#333" stroke="#555" stroke-width="1.5"/>
+  <circle cx="22" cy="48" r="3" fill="#777"/>
+  <circle cx="42" cy="48" r="7" fill="#333" stroke="#555" stroke-width="1.5"/>
+  <circle cx="42" cy="48" r="3" fill="#777"/>
+  <circle cx="58" cy="48" r="5" fill="#333" stroke="#555" stroke-width="1.2"/>
+  <circle cx="58" cy="48" r="2" fill="#777"/>
+  <!-- Connecting rod -->
+  <rect x="20" y="47" width="24" height="2" rx="1" fill="#888"/>
+  <defs>
+    <linearGradient id="bodyGrad" x1="10" y1="15" x2="10" y2="43" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="windowGrad" x1="49" y1="12" x2="49" y2="22" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.7"/>
+      <stop offset="1" stop-color="#88c8e8" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+</svg>

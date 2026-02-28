@@ -80,12 +80,11 @@
   border-radius: 22px;
   padding: 10px;
   box-shadow: 0 10px 18px #8f6a521b;
-  aspect-ratio: 1 / 1;
   width: 220px;
+  min-height: 220px;
   display: grid;
-  grid-template-rows: 38% 1fr;
+  grid-template-rows: 84px 1fr;
   gap: 10px;
-  overflow: hidden;
 }
 
 .badge {
@@ -134,6 +133,10 @@
   margin: 0;
   font-size: 0.96rem;
   line-height: 1.15;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .card p {
@@ -307,6 +310,8 @@
 
   .card {
     width: 170px;
+    min-height: 170px;
+    grid-template-rows: 65px 1fr;
     border-radius: 18px;
     padding: 8px;
   }

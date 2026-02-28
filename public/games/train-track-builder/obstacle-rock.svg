@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <!-- Shadow -->
+  <ellipse cx="30" cy="54" rx="18" ry="5" fill="#555" opacity="0.15"/>
+  <!-- Big boulder -->
+  <path d="M8,48 Q6,36 14,28 Q20,22 30,20 Q42,18 50,26 Q56,34 54,46 Q52,52 30,54 Q12,54 8,48Z" fill="#9E9E9E"/>
+  <path d="M8,48 Q6,36 14,28 Q20,22 30,20 Q42,18 50,26 Q56,34 54,46 Q52,52 30,54 Q12,54 8,48Z" fill="url(#rockGrad)"/>
+  <!-- Highlight -->
+  <path d="M16,32 Q22,24 34,22 Q28,26 20,34Z" fill="white" opacity="0.2"/>
+  <!-- Cracks -->
+  <path d="M28,26 L32,34 L30,38" stroke="#777" stroke-width="1" fill="none" opacity="0.4"/>
+  <path d="M38,30 L40,36" stroke="#777" stroke-width="0.8" fill="none" opacity="0.3"/>
+  <!-- Small rocks -->
+  <ellipse cx="16" cy="50" rx="5" ry="3.5" fill="#ABABAB"/>
+  <ellipse cx="44" cy="50" rx="4" ry="3" fill="#B5B5B5"/>
+  <defs>
+    <linearGradient id="rockGrad" x1="10" y1="20" x2="50" y2="54" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#CACACA"/>
+      <stop offset="0.6" stop-color="#9E9E9E"/>
+      <stop offset="1" stop-color="#7A7A7A"/>
+    </linearGradient>
+  </defs>
+</svg>

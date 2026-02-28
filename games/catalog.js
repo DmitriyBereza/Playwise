@@ -20,6 +20,16 @@ export const gamesCatalog = [
     path: '/games/corgi-math-run',
   },
   {
+    slug: 'train-track-builder',
+    titleKey: 'games.trainTrackBuilder.title',
+    descriptionKey: 'games.trainTrackBuilder.description',
+    ageKey: 'ages.3plus',
+    ageGroup: '3plus',
+    image: '/games/train-track-builder-preview.svg',
+    skills: ['skills.logic', 'skills.spatial'],
+    path: '/games/train-track-builder',
+  },
+  {
     slug: 'typing-balloons',
     titleKey: 'games.typingBalloons.title',
     descriptionKey: 'games.typingBalloons.description',

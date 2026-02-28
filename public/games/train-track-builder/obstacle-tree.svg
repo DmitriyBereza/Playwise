@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" fill="none">
+  <!-- Shadow -->
+  <ellipse cx="30" cy="56" rx="14" ry="4" fill="#2a5a2a" opacity="0.2"/>
+  <!-- Trunk -->
+  <rect x="25" y="38" width="10" height="18" rx="2" fill="#8B6914"/>
+  <rect x="25" y="38" width="4" height="18" rx="1" fill="#A67C30" opacity="0.5"/>
+  <!-- Bark lines -->
+  <line x1="28" y1="42" x2="28" y2="46" stroke="#6B4F10" stroke-width="0.8" opacity="0.5"/>
+  <line x1="32" y1="44" x2="32" y2="50" stroke="#6B4F10" stroke-width="0.8" opacity="0.5"/>
+  <!-- Leaf layers (bottom to top for depth) -->
+  <ellipse cx="30" cy="30" rx="18" ry="14" fill="#5FA663"/>
+  <ellipse cx="28" cy="26" rx="14" ry="11" fill="#7BC47F"/>
+  <ellipse cx="32" cy="22" rx="10" ry="9" fill="#A8D8A0"/>
+  <!-- Highlights -->
+  <ellipse cx="26" cy="20" rx="5" ry="4" fill="#C0ECC0" opacity="0.5"/>
+  <!-- Small apples/flowers -->
+  <circle cx="20" cy="28" r="2" fill="#FF6B6B" opacity="0.7"/>
+  <circle cx="38" cy="26" r="1.8" fill="#FF6B6B" opacity="0.6"/>
+</svg>
