@@ -1,105 +1,182 @@
 .page {
   min-height: 100vh;
+  background: linear-gradient(160deg, #d0eeff 0%, #e8f8ff 60%, #f0ffe8 100%);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 1rem;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
 }
 
 .card {
   background: #fffefb;
-  border: 3px solid #e8dcff;
+  border: 3px solid #c8e8ff;
   border-radius: 24px;
   padding: 18px;
-  box-shadow: 0 12px 24px #8f6a5230;
+  box-shadow: 0 8px 32px rgba(0, 80, 160, 0.10);
+  width: 100%;
+  max-width: 600px;
 }
 
+/* Header */
 .head {
   display: flex;
   justify-content: space-between;
   gap: 10px;
   align-items: flex-start;
+  margin-bottom: 12px;
 }
 
 .head h1 {
-  margin: 0 0 6px;
+  margin: 0 0 4px;
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #2a4a6a;
 }
 
 .head p {
   margin: 0;
+  font-size: 0.85rem;
+  color: #668;
 }
 
+/* Stats row */
 .stats {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  display: flex;
   gap: 8px;
-  margin-top: 12px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
 }
 
-.stats p {
-  margin: 0;
-  border: 2px solid #d8e8f7;
-  background: #f7fcff;
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #f0faff, #e8f4ff);
+  border: 2px solid #c8e0ff;
   border-radius: 12px;
-  padding: 8px 10px;
-  font-weight: 700;
+  padding: 6px 14px;
+  min-width: 70px;
+  flex: 1;
 }
 
+.statLabel {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #7090b0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.statValue {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #e04040;
+  line-height: 1.2;
+}
+
+/* Status text */
 .status {
-  margin: 10px 0;
+  margin: 6px 0 8px;
   font-weight: 700;
+  font-size: 0.9rem;
+  color: #446;
+  min-height: 1.3rem;
+  text-align: center;
 }
 
+/* Game canvas */
 .canvas {
   width: 100%;
-  max-width: 560px;
-  border: 2px solid #d8e8f7;
+  border: 3px solid #aad0f0;
   border-radius: 16px;
   display: block;
   touch-action: none;
+  box-shadow: 0 4px 16px rgba(0, 80, 180, 0.12);
 }
 
+/* Controls */
 .controls {
   margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(2, 54px);
+  grid-template-columns: repeat(2, 1fr);
   gap: 8px;
+  max-width: 180px;
 }
 
-.controls button,
-.actions button {
+.btnControl {
   border: 0;
-  border-radius: 12px;
-  background: #95c8ff;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #5ab4ff, #2a80e0);
   color: #fff;
-  font-weight: 800;
-  font-size: 1.1rem;
-  min-height: 48px;
+  font-weight: 900;
+  font-size: 1.4rem;
+  min-height: 52px;
   cursor: pointer;
   touch-action: none;
+  box-shadow: 0 3px 8px rgba(42, 128, 224, 0.35);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
-.controls button:active,
-.actions button:active {
-  transform: translateY(1px);
+.btnControl:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 4px rgba(42, 128, 224, 0.3);
 }
 
+/* Action buttons */
 .actions {
   margin-top: 12px;
+  display: flex;
+  justify-content: center;
 }
 
-.actions button {
-  padding: 10px 14px;
-  background: #ffb889;
-  font-size: 0.98rem;
+.btnStart {
+  padding: 0.65rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ff7b54, #e04040);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(224, 64, 64, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  letter-spacing: 0.02em;
 }
 
-@media (max-width: 760px) {
-  .head {
-    flex-direction: column;
+.btnStart:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 18px rgba(224, 64, 64, 0.45);
+}
+
+.btnStart:active {
+  transform: scale(0.97);
+}
+
+/* Responsive */
+@media (max-width: 500px) {
+  .page {
+    padding: 0.5rem;
   }
 
-  .stats {
-    grid-template-columns: 1fr;
+  .card {
+    padding: 12px;
+    border-radius: 18px;
+  }
+
+  .head h1 {
+    font-size: 1.15rem;
   }
 
   .controls {
-    grid-template-columns: repeat(2, 1fr);
+    max-width: 100%;
+  }
+
+  .btnControl {
+    min-height: 56px;
+    font-size: 1.6rem;
   }
 }
