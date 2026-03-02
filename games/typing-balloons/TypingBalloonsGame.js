@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import KidWordInput from '../../components/KidWordInput';
 import LocaleSwitcher from '../../components/LocaleSwitcher';
 import { useI18n } from '../../lib/i18n/I18nProvider';
 import styles from './typingBalloons.module.css';
 
 const HIGH_SCORES_KEY = 'kidsTyperHighScoresV1';
+const SPEED_PREF_KEY = 'kidsTyperSpeedPrefV1';
 
 function toLocaleTag(locale) {
   return locale === 'en' ? 'en-US' : 'uk-UA';
@@ -33,6 +34,7 @@ function createBalloons(word, locale) {
       tiltStart: -9 + Math.random() * 8,
       tiltEnd: 2 + Math.random() * 10,
       color: randomColor(),
+      popping: false,
     }));
 }
 
@@ -48,9 +50,21 @@ export default function TypingBalloonsGame() {
   const [speed, setSpeed] = useState(2.2);
   const [strictOrder, setStrictOrder] = useState(true);
   const [status, setStatus] = useState('');
+  const [paused, setPaused] = useState(false);
   const isRoundActive = Boolean(roundWord);
   const localeTag = toLocaleTag(locale);
   const quickWords = t('typingGame.quickWords') || [];
+
+  // Load saved speed preference
+  useEffect(() => {
+    const savedSpeed = window.localStorage.getItem(SPEED_PREF_KEY);
+    if (savedSpeed) {
+      const parsed = Number(savedSpeed);
+      if (Number.isFinite(parsed) && parsed >= 1 && parsed <= 4) {
+        setSpeed(parsed);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!roundWord) {
@@ -59,17 +73,20 @@ export default function TypingBalloonsGame() {
   }, [roundWord, t]);
 
   const sortedBalloons = useMemo(
-    () => [...balloons].sort((a, b) => a.index - b.index),
+    () => [...balloons].filter((b) => !b.popping).sort((a, b) => a.index - b.index),
     [balloons]
   );
   const totalLetters = nextIndex + sortedBalloons.length;
   const poppedCount = totalLetters - sortedBalloons.length;
   const isWin = useMemo(
-    () => Boolean(roundWord) && sortedBalloons.length === 0,
-    [roundWord, sortedBalloons.length]
+    () => Boolean(roundWord) && sortedBalloons.length === 0 && balloons.every((b) => b.popping || false) === false && balloons.length === 0,
+    [roundWord, sortedBalloons.length, balloons]
   );
   const activeBalloonId = strictOrder ? sortedBalloons[0]?.id : null;
   const progressPercent = totalLetters ? Math.round((poppedCount / totalLetters) * 100) : 0;
+
+  // Check win: all balloons removed (not just popping)
+  const allPopped = Boolean(roundWord) && balloons.length === 0;
 
   useEffect(() => {
     const raw = window.localStorage.getItem(HIGH_SCORES_KEY);
@@ -83,7 +100,7 @@ export default function TypingBalloonsGame() {
         const normalized = parsed
           .map((item) => {
             if (typeof item === 'number' && Number.isFinite(item)) {
-              return { score: item, word: 'БЕЗ СЛОВА' };
+              return { score: item, word: '—' };
             }
             if (
               item &&
@@ -108,20 +125,20 @@ export default function TypingBalloonsGame() {
   }, [localeTag]);
 
   useEffect(() => {
-    if (!isWin || roundSaved) {
+    if (!allPopped || roundSaved) {
       return;
     }
 
     setRoundSaved(true);
     setHighScores((prev) => {
-      const updated = [...prev, { score, word: roundWord.toLocaleUpperCase('uk-UA') }]
+      const updated = [...prev, { score, word: roundWord.toLocaleUpperCase(localeTag) }]
         .sort((a, b) => b.score - a.score)
         .slice(0, 5);
       window.localStorage.setItem(HIGH_SCORES_KEY, JSON.stringify(updated));
       return updated;
     });
     setStatus(t('typingGame.status.resultSaved'));
-  }, [isWin, roundSaved, score, roundWord, t]);
+  }, [allPopped, roundSaved, score, roundWord, localeTag, t]);
 
   const handleSend = () => {
     const cleaned = text.trim().toLocaleUpperCase(localeTag);
@@ -143,18 +160,28 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
+    setPaused(false);
     setStatus(t('typingGame.status.orderMode'));
   };
 
-  const popBalloon = (balloon) => {
+  const popBalloon = useCallback((balloon) => {
+    if (paused) return;
     if (strictOrder && balloon.index !== nextIndex) {
       return;
     }
 
-    setBalloons((prev) => prev.filter((item) => item.id !== balloon.id));
+    // Mark as popping for animation, then remove after animation completes
+    setBalloons((prev) =>
+      prev.map((item) => (item.id === balloon.id ? { ...item, popping: true } : item))
+    );
     setNextIndex((prev) => prev + 1);
     setScore((prev) => prev + 10);
-  };
+
+    // Remove after pop animation (300ms)
+    setTimeout(() => {
+      setBalloons((prev) => prev.filter((item) => item.id !== balloon.id));
+    }, 300);
+  }, [paused, strictOrder, nextIndex]);
 
   const resetRound = () => {
     setRoundWord('');
@@ -162,6 +189,7 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
+    setPaused(false);
     setStatus(t('typingGame.status.newRound'));
   };
 
@@ -177,7 +205,18 @@ export default function TypingBalloonsGame() {
     setNextIndex(0);
     setScore(0);
     setRoundSaved(false);
+    setPaused(false);
     setStatus(t('typingGame.status.playAgain'));
+  };
+
+  const handleSpeedChange = (e) => {
+    const newSpeed = Number(e.target.value);
+    setSpeed(newSpeed);
+    window.localStorage.setItem(SPEED_PREF_KEY, String(newSpeed));
+  };
+
+  const togglePause = () => {
+    setPaused((prev) => !prev);
   };
 
   return (
@@ -206,7 +245,7 @@ export default function TypingBalloonsGame() {
             max="4"
             step="0.1"
             value={speed}
-            onChange={(e) => setSpeed(Number(e.target.value))}
+            onChange={handleSpeedChange}
           />
           <p>{t('typingGame.speedHint')}</p>
         </div>
@@ -223,9 +262,14 @@ export default function TypingBalloonsGame() {
           <button type="button" className={styles.secondary} onClick={resetRound}>
             {t('typingGame.newGame')}
           </button>
+          {isRoundActive && !allPopped && (
+            <button type="button" className={styles.secondary} onClick={togglePause} aria-label={paused ? t('common.resume') : t('common.pause')}>
+              {paused ? t('common.resume') : t('common.pause')}
+            </button>
+          )}
         </div>
 
-        <p className={styles.status}>{status}</p>
+        <p className={styles.status} aria-live="polite">{paused ? t('common.paused') : status}</p>
       </section>
 
       <section className={styles.game} aria-live="polite">
@@ -256,19 +300,19 @@ export default function TypingBalloonsGame() {
           </p>
         )}
 
-        <div className={styles.progress} aria-label="Прогрес">
+        <div className={styles.progress} role="progressbar" aria-valuenow={progressPercent} aria-valuemin={0} aria-valuemax={100}>
           <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
         </div>
 
-        <div className={styles.playfield}>
-          {sortedBalloons.map((balloon) => {
+        <div className={`${styles.playfield} ${paused ? styles.playfieldPaused : ''}`}>
+          {balloons.map((balloon) => {
             const isActive = !strictOrder || balloon.id === activeBalloonId;
             return (
               <button
                 key={balloon.id}
-                className={`${styles.balloon} ${isActive ? styles.active : styles.locked}`}
+                className={`${styles.balloon} ${isActive ? styles.active : styles.locked} ${balloon.popping ? styles.popping : ''}`}
                 onClick={() => popBalloon(balloon)}
-                disabled={!isActive}
+                disabled={!isActive || balloon.popping || paused}
                 style={{
                   left: `${balloon.left}%`,
                   animationDelay: `${balloon.delay}s`,
@@ -277,15 +321,22 @@ export default function TypingBalloonsGame() {
                   '--drift-x': `${balloon.driftX}px`,
                   '--tilt-start': `${balloon.tiltStart}deg`,
                   '--tilt-end': `${balloon.tiltEnd}deg`,
+                  animationPlayState: paused ? 'paused' : 'running',
                 }}
-                aria-label={`Кулька з літерою ${balloon.char}`}
+                aria-label={`${t('typingGame.title')} - ${balloon.char}`}
               >
                 {balloon.char}
               </button>
             );
           })}
 
-          {isWin && (
+          {paused && (
+            <div className={styles.pauseOverlay}>
+              <span>{t('common.paused')}</span>
+            </div>
+          )}
+
+          {allPopped && (
             <div className={styles.winnerScreen}>
               <div className={`${styles.spark} ${styles.spark1}`} />
               <div className={`${styles.spark} ${styles.spark2}`} />

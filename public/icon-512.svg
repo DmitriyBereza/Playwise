@@ -1,0 +1,11 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E7F8FF"/>
+      <stop offset="1" stop-color="#FFF3D8"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="102" fill="url(#bg)"/>
+  <rect width="512" height="512" rx="102" stroke="#D8C9EE" stroke-width="13" fill="none"/>
+  <text x="256" y="317.44" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="179" fill="#6f62a4">P</text>
+</svg>

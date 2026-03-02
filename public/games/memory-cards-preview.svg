@@ -1,0 +1,26 @@
+<svg width="400" height="240" viewBox="0 0 400 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mcbg" x1="0" y1="0" x2="400" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F0F8FF"/>
+      <stop offset="1" stop-color="#FFF5F8"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" rx="20" fill="url(#mcbg)"/>
+  <!-- Card grid 3x2 -->
+  <!-- Row 1 -->
+  <rect x="60" y="30" width="70" height="80" rx="10" fill="#d8c9ee" stroke="#b5a0d4" stroke-width="2"/>
+  <text x="95" y="80" text-anchor="middle" font-size="28">?</text>
+  <rect x="165" y="30" width="70" height="80" rx="10" fill="#d8c9ee" stroke="#b5a0d4" stroke-width="2"/>
+  <text x="200" y="80" text-anchor="middle" font-size="28">?</text>
+  <rect x="270" y="30" width="70" height="80" rx="10" fill="#ffedbb" stroke="#e8d090" stroke-width="2"/>
+  <text x="305" y="82" text-anchor="middle" font-size="32">🐱</text>
+  <!-- Row 2 -->
+  <rect x="60" y="130" width="70" height="80" rx="10" fill="#ffedbb" stroke="#e8d090" stroke-width="2"/>
+  <text x="95" y="182" text-anchor="middle" font-size="32">🌻</text>
+  <rect x="165" y="130" width="70" height="80" rx="10" fill="#d8c9ee" stroke="#b5a0d4" stroke-width="2"/>
+  <text x="200" y="180" text-anchor="middle" font-size="28">?</text>
+  <rect x="270" y="130" width="70" height="80" rx="10" fill="#ffedbb" stroke="#e8d090" stroke-width="2"/>
+  <text x="305" y="182" text-anchor="middle" font-size="32">🐱</text>
+  <!-- Match line -->
+  <line x1="305" y1="115" x2="305" y2="125" stroke="#9cf196" stroke-width="3" stroke-linecap="round"/>
+</svg>

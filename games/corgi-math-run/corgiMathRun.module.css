@@ -392,10 +392,31 @@
   }
 
   .stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
   }
 
   .difficultyRow {
     grid-template-columns: 1fr;
+  }
+
+  .track {
+    height: 340px;
+  }
+
+  .options button,
+  .gameOver button {
+    min-height: 48px;
+    padding: 12px 20px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .track {
+    height: 280px;
   }
 }

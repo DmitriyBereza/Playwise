@@ -333,3 +333,26 @@
     max-width: 58%;
   }
 }
+
+@media (max-width: 420px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .card {
+    width: auto;
+    min-height: 150px;
+    grid-template-rows: 60px 1fr;
+    padding: 6px;
+  }
+
+  .card h3 {
+    font-size: 0.82rem;
+  }
+
+  .playLink {
+    padding: 5px 8px;
+    font-size: 0.78rem;
+  }
+}

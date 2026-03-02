@@ -1,0 +1,336 @@
+.page {
+  min-height: 100vh;
+}
+
+.card {
+  background: #fffefb;
+  border: 3px solid #e8dcff;
+  border-radius: 24px;
+  padding: 18px;
+  box-shadow: 0 12px 24px #8f6a5230;
+}
+
+.head {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.head h1 {
+  margin: 0 0 6px;
+  font-family: 'Comfortaa', cursive;
+}
+
+.head p {
+  margin: 0;
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ---- Stats ---- */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, 1fr));
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.stats p {
+  margin: 0;
+  border: 2px solid #d8e8f7;
+  background: #f7fcff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+}
+
+.streakBadge {
+  background: #fff4d6 !important;
+  border-color: #f5d98a !important;
+  color: #a87d00;
+}
+
+/* ---- Progress bar ---- */
+
+.progressBar {
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: #f0d8c0;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #8fd49a, #7bc5ed);
+  transition: width 0.25s ease-out;
+}
+
+/* ---- Status ---- */
+
+.status {
+  margin: 8px 0 10px;
+  font-weight: 700;
+  font-family: 'Nunito', sans-serif;
+  min-height: 1.4em;
+}
+
+/* ---- Menu (idle) ---- */
+
+.menu {
+  margin-top: 14px;
+  border: 2px solid #d9c8f0;
+  border-radius: 16px;
+  padding: 14px;
+  background: #fcf8ff;
+  text-align: center;
+}
+
+.menu h2 {
+  margin: 0 0 10px;
+  font-family: 'Comfortaa', cursive;
+}
+
+.difficultyRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(100px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.difficultyBtn {
+  border: 2px solid #d9c8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #3c3562;
+  font-weight: 800;
+  padding: 10px 8px;
+  cursor: pointer;
+  display: grid;
+  gap: 4px;
+  text-align: center;
+  font-family: 'Nunito', sans-serif;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.difficultyBtn span {
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.difficultyActive {
+  background: #e9f8ee;
+  border-color: #b8dfc3;
+}
+
+.difficultyBtn:hover {
+  filter: brightness(0.97);
+}
+
+.startBtn {
+  display: inline-block;
+  border: 0;
+  border-radius: 999px;
+  background: #ffb889;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Nunito', sans-serif;
+  transition: filter 0.15s;
+}
+
+.startBtn:hover {
+  filter: brightness(0.95);
+}
+
+/* ---- Arena (playing) ---- */
+
+.arena {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.shapeDisplay {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 3px solid #d9c8f0;
+  border-radius: 22px;
+  padding: 24px 32px;
+  background: #fcf8ff;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+}
+
+.shapeCorrect {
+  border-color: #8fd49a;
+  box-shadow: 0 0 0 4px #8fe3a244;
+  animation: bounceIn 0.4s ease;
+}
+
+.shapeWrong {
+  border-color: #ff8a9b;
+  box-shadow: 0 0 0 4px #ff8a9b44;
+  animation: shake 0.4s ease;
+}
+
+.shapeLabel {
+  font-weight: 700;
+  font-size: 0.95rem;
+  font-family: 'Nunito', sans-serif;
+  color: #3c3562;
+}
+
+/* ---- Bins ---- */
+
+.bins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  width: 100%;
+}
+
+.bin {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  border: 3px solid #d8e8f7;
+  border-radius: 18px;
+  background: #f7fcff;
+  padding: 14px 18px;
+  cursor: pointer;
+  min-width: 90px;
+  transition: transform 0.12s, border-color 0.12s, box-shadow 0.12s;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #3c3562;
+}
+
+.bin:hover {
+  transform: scale(1.06);
+  border-color: #b8dfc3;
+  box-shadow: 0 6px 14px #8f6a5220;
+}
+
+.bin:active {
+  transform: scale(0.97);
+}
+
+.binLabel {
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ---- Summary (won) ---- */
+
+.summary {
+  margin-top: 14px;
+  border: 2px solid #d9c8f0;
+  border-radius: 16px;
+  padding: 18px;
+  background: #fcf8ff;
+  text-align: center;
+}
+
+.summary h2 {
+  margin: 0 0 10px;
+  font-family: 'Comfortaa', cursive;
+}
+
+.summary p {
+  margin: 0 0 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 1.1rem;
+}
+
+.summaryActions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.secondaryBtn {
+  display: inline-block;
+  border: 0;
+  border-radius: 999px;
+  background: #95c8ff;
+  color: #fff;
+  font-weight: 800;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Nunito', sans-serif;
+  transition: filter 0.15s;
+}
+
+.secondaryBtn:hover {
+  filter: brightness(0.95);
+}
+
+/* ---- Animations ---- */
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.08);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-6px);
+  }
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 760px) {
+  .head {
+    flex-direction: column;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+
+  .difficultyRow {
+    grid-template-columns: 1fr;
+  }
+
+  .shapeDisplay {
+    padding: 18px 22px;
+  }
+
+  .bins {
+    gap: 8px;
+  }
+
+  .bin {
+    min-width: 74px;
+    padding: 10px 12px;
+  }
+}

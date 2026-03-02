@@ -12,13 +12,18 @@ const PLANE_X      = 110;   // fixed screen x of plane center
 const PLANE_Y_MID  = 150;   // default vertical start
 const PLANE_Y_MIN  = 52;
 const PLANE_Y_MAX  = 232;
-const INITIAL_SPEED = 180;
-const SPEED_INC     = 32;   // px/s added per wave
-const WAVE_DIST     = 1600; // world px per wave
 const MAX_SPEED     = 660;
 const MAX_LIVES     = 5;
 const INV_DUR       = 1.5;  // invincibility seconds after hit
+const SHAKE_DUR     = 0.4;  // screen shake duration on collision
 const HIGH_SCORE_KEY = 'planeForestRunHighScoreV2';
+
+// ─── Difficulty presets ──────────────────────────────────────────────────────
+const DIFFICULTY = {
+  easy:   { initialSpeed: 140, speedInc: 20, waveDist: 1800, gapBonus: 40 },
+  medium: { initialSpeed: 180, speedInc: 32, waveDist: 1600, gapBonus: 0  },
+  hard:   { initialSpeed: 220, speedInc: 40, waveDist: 1400, gapBonus: -30 },
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
@@ -360,10 +365,25 @@ function drawScene(ctx, state) {
     obstacles, lives, invTimer,
     waveNum, waveFlashTimer,
     propAngle, exhaustParticles,
+    shakeTimer, difficultyKey,
   } = state;
 
+  const preset = DIFFICULTY[difficultyKey] || DIFFICULTY.medium;
+
   // Speed ratio 0 → 1 (for colour shifts)
-  const t = (speed - INITIAL_SPEED) / (MAX_SPEED - INITIAL_SPEED);
+  const t = (speed - preset.initialSpeed) / (MAX_SPEED - preset.initialSpeed);
+
+  // ── Screen shake offset ──────────────────────────────────────────────────
+  let shakeX = 0;
+  let shakeY = 0;
+  if (shakeTimer > 0) {
+    const intensity = (shakeTimer / SHAKE_DUR) * 6; // fades out
+    shakeX = (Math.random() - 0.5) * intensity * 2;
+    shakeY = (Math.random() - 0.5) * intensity * 2;
+  }
+
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
 
   // ── Sky gradient ────────────────────────────────────────────────────────────
   const skyTop = lerpRgb([100, 180, 240], [240, 90, 30], t * 0.72);
@@ -374,7 +394,7 @@ function drawScene(ctx, state) {
   skyGrd.addColorStop(0.60, skyMid);
   skyGrd.addColorStop(1,    skyBot);
   ctx.fillStyle = skyGrd;
-  ctx.fillRect(0, 0, CW, CH);
+  ctx.fillRect(-4, -4, CW + 8, CH + 8); // slightly oversized to cover shake
 
   // ── Background clouds ──────────────────────────────────────────────────────
   for (let i = 0; i < 6; i++) {
@@ -421,10 +441,10 @@ function drawScene(ctx, state) {
   // ── Ground strip ───────────────────────────────────────────────────────────
   const groundCol = lerpRgb([100, 168, 65], [150, 108, 40], t * 0.55);
   ctx.fillStyle = groundCol;
-  ctx.fillRect(0, CH - 52, CW, 52);
+  ctx.fillRect(-4, CH - 52, CW + 8, 56);
   // Dark edge
   ctx.fillStyle = lerpRgb([78, 138, 45], [120, 85, 28], t * 0.5);
-  ctx.fillRect(0, CH - 52, CW, 7);
+  ctx.fillRect(-4, CH - 52, CW + 8, 7);
 
   // ── Obstacles ──────────────────────────────────────────────────────────────
   obstacles.forEach((o) => {
@@ -473,7 +493,7 @@ function drawScene(ctx, state) {
   ctx.fillStyle = 'rgba(0,0,0,0.18)';
   roundRect(ctx, 14, barY, barW, barH, 3);
   ctx.fill();
-  const speedRatio = (speed - INITIAL_SPEED) / (MAX_SPEED - INITIAL_SPEED);
+  const speedRatio = (speed - preset.initialSpeed) / (MAX_SPEED - preset.initialSpeed);
   ctx.fillStyle = lerpRgb([60, 200, 60], [255, 50, 50], speedRatio);
   if (barW * speedRatio > 0) {
     roundRect(ctx, 14, barY, barW * speedRatio, barH, 3);
@@ -486,7 +506,7 @@ function drawScene(ctx, state) {
     ctx.save();
     ctx.globalAlpha = flashA;
     ctx.fillStyle = '#fff9c4';
-    ctx.fillRect(0, 0, CW, CH);
+    ctx.fillRect(-4, -4, CW + 8, CH + 8);
     ctx.restore();
 
     ctx.save();
@@ -495,9 +515,21 @@ function drawScene(ctx, state) {
     ctx.font = 'bold 30px Nunito, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`Wave ${waveNum + 1}! 🚀`, CW / 2, CH / 2 - 4);
+    ctx.fillText(`Wave ${waveNum + 1}!`, CW / 2, CH / 2 - 4);
     ctx.restore();
   }
+
+  // ── Collision flash overlay ────────────────────────────────────────────────
+  if (shakeTimer > 0) {
+    const flashAlpha = (shakeTimer / SHAKE_DUR) * 0.35;
+    ctx.save();
+    ctx.globalAlpha = flashAlpha;
+    ctx.fillStyle = '#ff2020';
+    ctx.fillRect(-4, -4, CW + 8, CH + 8);
+    ctx.restore();
+  }
+
+  ctx.restore(); // undo shake translate
 }
 
 // ─── Obstacle spawner ─────────────────────────────────────────────────────────
@@ -517,9 +549,10 @@ function spawnObstacle(s) {
     y = randF(PLANE_Y_MIN + 10, PLANE_Y_MAX - 35);
   }
   s.obstacles.push({ id: `ob-${_obId++}`, worldX: s.nextObstacleX, y, w, h, type });
-  // Gap shrinks with waves but has a floor
-  const minGap = Math.max(190, 400 - s.waveNum * 16);
-  const maxGap = Math.max(260, 540 - s.waveNum * 14);
+  // Gap shrinks with waves but has a floor; difficulty adjusts via gapBonus
+  const preset = DIFFICULTY[s.difficultyKey] || DIFFICULTY.medium;
+  const minGap = Math.max(190, 400 - s.waveNum * 16 + preset.gapBonus);
+  const maxGap = Math.max(260, 540 - s.waveNum * 14 + preset.gapBonus);
   s.nextObstacleX += randInt(minGap, maxGap);
 }
 
@@ -531,21 +564,25 @@ export default function PlaneForestRunGame() {
   const lastTimeRef  = useRef(0);
   const pressedRef   = useRef({ up: false, down: false });
 
-  const [mode,      setMode]      = useState('idle');
-  const [score,     setScore]     = useState(0);
-  const [highScore, setHighScore] = useState(0);
-  const highScoreRef              = useRef(0);  // stable ref for RAF closure
-  const [lives,     setLives]     = useState(MAX_LIVES);
-  const [wave,      setWave]      = useState(0);
-  const [status,    setStatus]    = useState('');
+  const [mode,       setMode]       = useState('idle');
+  const [score,      setScore]      = useState(0);
+  const [highScore,  setHighScore]  = useState(0);
+  const highScoreRef                = useRef(0);  // stable ref for RAF closure
+  const [lives,      setLives]      = useState(MAX_LIVES);
+  const [wave,       setWave]       = useState(0);
+  const [status,     setStatus]     = useState('');
+  const [difficulty, setDifficulty] = useState('medium');
+  const [paused,     setPaused]     = useState(false);
+  const pausedRef                   = useRef(false);
 
   const stateRef = useRef({
     distance:          0,
-    speed:             INITIAL_SPEED,
+    speed:             DIFFICULTY.medium.initialSpeed,
     plane:             { x: PLANE_X, y: PLANE_Y_MID },
     obstacles:         [],
     lives:             MAX_LIVES,
     invTimer:          0,
+    shakeTimer:        0,
     waveNum:           0,
     waveFlashTimer:    0,
     propAngle:         0,
@@ -553,6 +590,7 @@ export default function PlaneForestRunGame() {
     score:             0,
     nextObstacleX:     520,
     mode:              'idle',
+    difficultyKey:     'medium',
   });
 
   // Load high score on mount
@@ -576,6 +614,8 @@ export default function PlaneForestRunGame() {
     const s = stateRef.current;
     s.mode = 'gameOver';
     setMode('gameOver');
+    setPaused(false);
+    pausedRef.current = false;
     syncState();
     if (s.score > highScoreRef.current) {
       highScoreRef.current = s.score;
@@ -585,13 +625,15 @@ export default function PlaneForestRunGame() {
   };
 
   const startRun = () => {
+    const preset = DIFFICULTY[difficulty];
     stateRef.current = {
       distance:         0,
-      speed:            INITIAL_SPEED,
+      speed:            preset.initialSpeed,
       plane:            { x: PLANE_X, y: PLANE_Y_MID },
       obstacles:        [],
       lives:            MAX_LIVES,
       invTimer:         0,
+      shakeTimer:       0,
       waveNum:          0,
       waveFlashTimer:   0,
       propAngle:        0,
@@ -599,8 +641,11 @@ export default function PlaneForestRunGame() {
       score:            0,
       nextObstacleX:    520,
       mode:             'playing',
+      difficultyKey:    difficulty,
     };
     setMode('playing');
+    setPaused(false);
+    pausedRef.current = false;
     setScore(0);
     setLives(MAX_LIVES);
     setWave(0);
@@ -608,10 +653,29 @@ export default function PlaneForestRunGame() {
     lastTimeRef.current = 0;
   };
 
+  const togglePause = () => {
+    const s = stateRef.current;
+    if (s.mode !== 'playing') return;
+    const next = !pausedRef.current;
+    pausedRef.current = next;
+    setPaused(next);
+    if (next) {
+      setStatus(t('common.paused'));
+    } else {
+      setStatus(t('planeGame.status.start'));
+      lastTimeRef.current = 0; // reset so dt doesn't spike
+    }
+  };
+
   // Game update logic
   const update = (dt) => {
     const s = stateRef.current;
-    if (s.mode !== 'playing') return;
+    if (s.mode !== 'playing' || pausedRef.current) return;
+
+    const preset = DIFFICULTY[s.difficultyKey] || DIFFICULTY.medium;
+
+    // Decrement shake timer
+    s.shakeTimer = Math.max(0, s.shakeTimer - dt);
 
     // Vertical movement
     const { up, down } = pressedRef.current;
@@ -623,10 +687,10 @@ export default function PlaneForestRunGame() {
     s.score      = Math.floor(s.distance / 20);
 
     // Wave / speed ramp
-    const newWave = Math.floor(s.distance / WAVE_DIST);
+    const newWave = Math.floor(s.distance / preset.waveDist);
     if (newWave > s.waveNum) {
       s.waveNum          = newWave;
-      s.speed            = Math.min(MAX_SPEED, INITIAL_SPEED + newWave * SPEED_INC);
+      s.speed            = Math.min(MAX_SPEED, preset.initialSpeed + newWave * preset.speedInc);
       s.waveFlashTimer   = 1.1;
     }
     s.waveFlashTimer = Math.max(0, s.waveFlashTimer - dt);
@@ -669,6 +733,7 @@ export default function PlaneForestRunGame() {
         if (intersects(pr, or)) {
           s.lives--;
           s.invTimer = INV_DUR;
+          s.shakeTimer = SHAKE_DUR;
           if (s.lives <= 0) {
             setStatus(t('planeGame.status.gameOver'));
             endGame();
@@ -708,6 +773,7 @@ export default function PlaneForestRunGame() {
     const down = (e) => {
       if (e.key === 'ArrowUp'   || e.key === 'w') { e.preventDefault(); pressedRef.current.up   = true; }
       if (e.key === 'ArrowDown' || e.key === 's') { e.preventDefault(); pressedRef.current.down = true; }
+      if (e.key === 'Escape' || e.key === 'p')    { e.preventDefault(); togglePause(); }
     };
     const up = (e) => {
       if (e.key === 'ArrowUp'   || e.key === 'w') { e.preventDefault(); pressedRef.current.up   = false; }
@@ -719,6 +785,7 @@ export default function PlaneForestRunGame() {
       window.removeEventListener('keydown', down);
       window.removeEventListener('keyup',   up);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const setBtn = (key, val) => { pressedRef.current[key] = val; };
@@ -782,12 +849,38 @@ export default function PlaneForestRunGame() {
           >↓</button>
         </div>
 
-        {/* Start / Play Again */}
-        {(mode === 'idle' || mode === 'gameOver') && (
+        {/* Pause button (visible during play) */}
+        {mode === 'playing' && (
           <div className={styles.actions}>
-            <button type="button" className={styles.btnStart} onClick={startRun}>
-              {mode === 'idle' ? t('planeGame.start') : t('planeGame.playAgain')}
+            <button type="button" className={styles.btnPause} onClick={togglePause}>
+              {paused ? t('common.resume') : t('common.pause')}
             </button>
+          </div>
+        )}
+
+        {/* Difficulty selector + Start / Play Again */}
+        {(mode === 'idle' || mode === 'gameOver') && (
+          <div className={styles.idlePanel}>
+            <div className={styles.difficultyRow}>
+              <span className={styles.difficultyLabel}>{t('planeGame.difficulty')}:</span>
+              <div className={styles.difficultyBtns}>
+                {['easy', 'medium', 'hard'].map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    className={`${styles.btnDifficulty} ${difficulty === lvl ? styles.btnDifficultyActive : ''}`}
+                    onClick={() => setDifficulty(lvl)}
+                  >
+                    {t(`planeGame.difficulty${lvl.charAt(0).toUpperCase() + lvl.slice(1)}`)}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className={styles.actions}>
+              <button type="button" className={styles.btnStart} onClick={startRun}>
+                {mode === 'idle' ? t('planeGame.start') : t('planeGame.playAgain')}
+              </button>
+            </div>
           </div>
         )}
 

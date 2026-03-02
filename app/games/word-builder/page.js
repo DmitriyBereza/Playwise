@@ -2,11 +2,11 @@
 
 import Link from 'next/link';
 import ErrorBoundary from '../../../components/ErrorBoundary';
-import TypingBalloonsGame from '../../../games/typing-balloons/TypingBalloonsGame';
+import WordBuilderGame from '../../../games/word-builder/WordBuilderGame';
 import { useI18n } from '../../../lib/i18n/I18nProvider';
 import styles from '../../portal.module.css';
 
-export default function TypingBalloonsPage() {
+export default function WordBuilderPage() {
   const { t } = useI18n();
 
   return (
@@ -15,7 +15,7 @@ export default function TypingBalloonsPage() {
         <Link href="/">{t('common.backToPortal')}</Link>
       </div>
       <ErrorBoundary fallbackTitle={t('common.errorTitle')} retryLabel={t('common.tryAgain')}>
-        <TypingBalloonsGame />
+        <WordBuilderGame />
       </ErrorBoundary>
     </main>
   );

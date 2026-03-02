@@ -10,6 +10,20 @@ const HIGH_SCORE_KEY = 'corgiMathRunHighScoreV1';
 const MAX_WRONG_ATTEMPTS = 3;
 const FEEDBACK_MS = 560;
 
+/* --- Named constants (fix #7) --- */
+const EQUATION_GENERATION_MAX_ATTEMPTS = 220;
+const SUBTRACTION_PROBABILITY = 0.32;
+const FALLBACK_EXTRA_RANGE = 2;
+const FALLBACK_RETRIES = 3;
+const HIGH_PROGRESS_THRESHOLD = 0.8;
+const MID_PROGRESS_THRESHOLD = 0.45;
+const OPTIONS_COUNT_HIGH = 5;
+const OPTIONS_COUNT_MID = 4;
+const OPTIONS_COUNT_LOW = 3;
+const OPTION_SPREAD_MULTIPLIER = 1.8;
+const MIN_OPTION_SPREAD = 2;
+const HINTS_PER_QUESTION = 1;
+
 const DIFFICULTIES = {
   easy: { count: 10, maxNumber: 6 },
   middle: { count: 15, maxNumber: 9 },
@@ -20,12 +34,13 @@ function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+/* --- Improved equation generation with graceful fallback (fix #8) --- */
 function buildEquation(usedKeys, difficulty, progressRatio) {
   const { maxNumber } = DIFFICULTIES[difficulty];
   let candidate = null;
 
-  for (let i = 0; i < 220; i += 1) {
-    const operation = Math.random() > 0.32 ? '+' : '-';
+  for (let i = 0; i < EQUATION_GENERATION_MAX_ATTEMPTS; i += 1) {
+    const operation = Math.random() > SUBTRACTION_PROBABILITY ? '+' : '-';
     let a = randomInt(1, maxNumber);
     let b = randomInt(0, maxNumber);
 
@@ -41,15 +56,43 @@ function buildEquation(usedKeys, difficulty, progressRatio) {
     }
   }
 
+  /* Graceful fallback: widen the range incrementally before giving up */
   if (!candidate) {
-    const a = randomInt(1, maxNumber + 2);
-    const b = randomInt(0, maxNumber + 1);
+    for (let extra = 1; extra <= FALLBACK_RETRIES; extra += 1) {
+      const bump = FALLBACK_EXTRA_RANGE * extra;
+      const operation = Math.random() > SUBTRACTION_PROBABILITY ? '+' : '-';
+      let a = randomInt(1, maxNumber + bump);
+      let b = randomInt(0, maxNumber + bump);
+
+      if (operation === '-' && b > a) {
+        [a, b] = [b, a];
+      }
+
+      const key = `${a}${operation}${b}`;
+      if (!usedKeys.has(key)) {
+        const answer = operation === '+' ? a + b : a - b;
+        candidate = { key, text: `${a} ${operation} ${b}`, answer };
+        break;
+      }
+    }
+  }
+
+  /* Last-resort: guaranteed unique addition */
+  if (!candidate) {
+    const a = randomInt(1, maxNumber + FALLBACK_EXTRA_RANGE * (FALLBACK_RETRIES + 1));
+    const b = randomInt(0, maxNumber + FALLBACK_EXTRA_RANGE * (FALLBACK_RETRIES + 1));
     candidate = { key: `${a}+${b}`, text: `${a} + ${b}`, answer: a + b };
   }
 
-  const optionCount = progressRatio >= 0.8 ? 5 : progressRatio >= 0.45 ? 4 : 3;
+  const optionCount =
+    progressRatio >= HIGH_PROGRESS_THRESHOLD
+      ? OPTIONS_COUNT_HIGH
+      : progressRatio >= MID_PROGRESS_THRESHOLD
+        ? OPTIONS_COUNT_MID
+        : OPTIONS_COUNT_LOW;
+
   const optionsSet = new Set([candidate.answer]);
-  const spread = Math.max(2, Math.ceil(optionCount * 1.8));
+  const spread = Math.max(MIN_OPTION_SPREAD, Math.ceil(optionCount * OPTION_SPREAD_MULTIPLIER));
 
   while (optionsSet.size < optionCount) {
     const delta = randomInt(-spread, spread);
@@ -76,6 +119,15 @@ export default function CorgiMathRunGame() {
   const [disabledOptions, setDisabledOptions] = useState([]);
   const [status, setStatus] = useState('');
   const [feedback, setFeedback] = useState('idle');
+
+  /* --- New state: pause (fix #1) --- */
+  const [paused, setPaused] = useState(false);
+
+  /* --- New state: hint system (fix #3) --- */
+  const [hintUsed, setHintUsed] = useState(false);
+
+  /* --- New state: combo counter (fix #6) --- */
+  const [combo, setCombo] = useState(0);
 
   const attemptsLeft = MAX_WRONG_ATTEMPTS - wrongAttempts;
   const progressPercent = targetCount ? Math.min(100, (score / targetCount) * 100) : 0;
@@ -126,7 +178,34 @@ export default function CorgiMathRunGame() {
     setEquation(first);
     setPhase('playing');
     setFeedback('idle');
+    setPaused(false);
+    setHintUsed(false);
+    setCombo(0);
     setStatus(t('corgiMathGame.status.ready'));
+  };
+
+  /* --- Pause / resume toggle (fix #1) --- */
+  const togglePause = () => {
+    setPaused((prev) => !prev);
+  };
+
+  /* --- Hint handler (fix #3) --- */
+  const handleHint = () => {
+    if (hintUsed || !equation || paused) {
+      return;
+    }
+
+    const wrongOptions = equation.options.filter(
+      (opt) => opt !== equation.answer && !disabledOptions.includes(opt)
+    );
+
+    if (wrongOptions.length === 0) {
+      return;
+    }
+
+    const toEliminate = wrongOptions[randomInt(0, wrongOptions.length - 1)];
+    setDisabledOptions((prev) => [...prev, toEliminate]);
+    setHintUsed(true);
   };
 
   const handleCorrect = (nextScore) => {
@@ -148,18 +227,21 @@ export default function CorgiMathRunGame() {
     setUsedEquationKeys(nextUsed);
     setEquation(nextEquation);
     setDisabledOptions([]);
+    setHintUsed(false);
     setStatus(t('corgiMathGame.status.correct'));
   };
 
   const handleAnswer = (value) => {
-    if (phase !== 'playing' || !equation || feedback === 'correct') {
+    if (phase !== 'playing' || !equation || feedback === 'correct' || paused) {
       return;
     }
 
     if (value === equation.answer) {
       setFeedback('correct');
       const nextScore = score + 1;
+      const nextCombo = combo + 1;
       setScore(nextScore);
+      setCombo(nextCombo);
       window.setTimeout(() => {
         setFeedback('idle');
         handleCorrect(nextScore);
@@ -175,6 +257,7 @@ export default function CorgiMathRunGame() {
     setWrongAttempts(nextWrong);
     setDisabledOptions((prev) => [...prev, value]);
     setFeedback('wrong');
+    setCombo(0);
     setStatus(t('corgiMathGame.status.wrong'));
 
     window.setTimeout(() => {
@@ -196,6 +279,9 @@ export default function CorgiMathRunGame() {
     setWrongAttempts(0);
     setScore(0);
     setFeedback('idle');
+    setPaused(false);
+    setHintUsed(false);
+    setCombo(0);
     setStatus(t('corgiMathGame.status.selectAndStart'));
   };
 
@@ -223,10 +309,20 @@ export default function CorgiMathRunGame() {
           <p>
             {t('corgiMathGame.attemptsLeft')}: <strong>{attemptsLeft}</strong>
           </p>
+          {/* --- Combo counter (fix #6) --- */}
+          {combo > 1 && (
+            <p>
+              <strong>{t('corgiMathGame.combo', { count: combo })}</strong>
+            </p>
+          )}
         </div>
 
         <div className={styles.hearts}>{hearts}</div>
-        <p className={styles.status}>{status}</p>
+
+        {/* --- aria-live region for status (fix #4) --- */}
+        <p className={styles.status} aria-live="polite">
+          {paused ? t('common.paused') : status}
+        </p>
 
         <div className={`${styles.track} ${feedback === 'correct' ? styles.trackCorrect : ''} ${feedback === 'wrong' ? styles.trackWrong : ''}`}>
           <div className={`${styles.parallaxLayer} ${styles.farLayer}`} style={{ backgroundPositionX: `-${farShift}px` }} aria-hidden="true" />
@@ -324,21 +420,41 @@ export default function CorgiMathRunGame() {
 
         {showQuiz && (
           <section className={`${styles.quiz} ${feedback === 'wrong' ? styles.quizWrong : ''} ${feedback === 'correct' ? styles.quizCorrect : ''}`}>
-            <p>{t('corgiMathGame.question')}</p>
-            <h2>{equation.text} = ?</h2>
-            <div className={styles.options}>
-              {equation.options.map((option) => (
+            {/* --- Pause button (fix #1) --- */}
+            <button type="button" className={styles.secondaryBtn} onClick={togglePause}>
+              {paused ? t('common.resume') : t('common.pause')}
+            </button>
+
+            {!paused && (
+              <>
+                <p>{t('corgiMathGame.question')}</p>
+                <h2>{equation.text} = ?</h2>
+                <div className={styles.options}>
+                  {equation.options.map((option, index) => (
+                    <button
+                      key={option}
+                      type="button"
+                      onClick={() => handleAnswer(option)}
+                      disabled={disabledOptions.includes(option)}
+                      className={disabledOptions.includes(option) ? styles.optionDisabled : ''}
+                      aria-label={`${t('corgiMathGame.question')} ${index + 1}: ${option}`}
+                    >
+                      {option}
+                    </button>
+                  ))}
+                </div>
+
+                {/* --- Hint button (fix #3) --- */}
                 <button
-                  key={option}
                   type="button"
-                  onClick={() => handleAnswer(option)}
-                  disabled={disabledOptions.includes(option)}
-                  className={disabledOptions.includes(option) ? styles.optionDisabled : ''}
+                  className={styles.secondaryBtn}
+                  onClick={handleHint}
+                  disabled={hintUsed}
                 >
-                  {option}
+                  {t('corgiMathGame.hint')}
                 </button>
-              ))}
-            </div>
+              </>
+            )}
           </section>
         )}
 

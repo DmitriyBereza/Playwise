@@ -1,0 +1,25 @@
+<svg width="400" height="240" viewBox="0 0 400 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wbbg" x1="0" y1="0" x2="400" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFBF0"/>
+      <stop offset="1" stop-color="#F0FFF5"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="240" rx="20" fill="url(#wbbg)"/>
+  <!-- Emoji hint -->
+  <text x="200" y="55" text-anchor="middle" font-size="42">🐱</text>
+  <!-- Letter slots (C A T) -->
+  <rect x="110" y="75" width="50" height="55" rx="10" fill="#d8f1da" stroke="#9cf196" stroke-width="3"/>
+  <text x="135" y="115" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="28" font-weight="700" fill="#2a6a30">C</text>
+  <rect x="175" y="75" width="50" height="55" rx="10" fill="#d8f1da" stroke="#9cf196" stroke-width="3"/>
+  <text x="200" y="115" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="28" font-weight="700" fill="#2a6a30">A</text>
+  <rect x="240" y="75" width="50" height="55" rx="10" fill="#fffefb" stroke="#e8dcff" stroke-width="3" stroke-dasharray="6 3"/>
+  <text x="265" y="113" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="22" fill="#c0b0d0">_</text>
+  <!-- Scrambled tiles below -->
+  <rect x="85" y="160" width="50" height="50" rx="10" fill="#e8dcff" stroke="#c4b0e8" stroke-width="2"/>
+  <text x="110" y="195" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="24" font-weight="700" fill="#6f62a4">T</text>
+  <rect x="175" y="160" width="50" height="50" rx="10" fill="#ffe0e0" stroke="#f0b0b0" stroke-width="2"/>
+  <text x="200" y="195" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="24" font-weight="700" fill="#c04040">A</text>
+  <rect x="265" y="160" width="50" height="50" rx="10" fill="#e0f0ff" stroke="#a0c8f0" stroke-width="2"/>
+  <text x="290" y="195" text-anchor="middle" font-family="Comfortaa, sans-serif" font-size="24" font-weight="700" fill="#3060a0">C</text>
+</svg>

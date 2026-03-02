@@ -156,6 +156,73 @@
   transform: scale(0.97);
 }
 
+/* Pause button */
+.btnPause {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #a0c4ff, #6a9fff);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 0 3px 10px rgba(106, 159, 255, 0.3);
+  transition: transform 0.15s ease;
+}
+
+.btnPause:hover {
+  transform: scale(1.04);
+}
+
+.btnPause:active {
+  transform: scale(0.97);
+}
+
+/* Difficulty selector */
+.idlePanel {
+  margin-top: 12px;
+}
+
+.difficultyRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.difficultyLabel {
+  font-weight: 800;
+  font-size: 0.85rem;
+  color: #446;
+}
+
+.difficultyBtns {
+  display: flex;
+  gap: 4px;
+}
+
+.btnDifficulty {
+  padding: 5px 12px;
+  border: 2px solid #c8e0ff;
+  border-radius: 999px;
+  background: #f0f8ff;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.btnDifficulty:hover {
+  background: #dbeeff;
+}
+
+.btnDifficultyActive {
+  background: linear-gradient(135deg, #5ab4ff, #2a80e0);
+  color: white;
+  border-color: #2a80e0;
+}
+
 /* Responsive */
 @media (max-width: 500px) {
   .page {

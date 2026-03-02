@@ -1,0 +1,12 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ogbg" x1="0" y1="0" x2="1200" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7f2ff"/>
+      <stop offset="1" stop-color="#f7ffe8"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#ogbg)"/>
+  <text x="600" y="260" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="800" font-size="72" fill="#6f62a4">Playwise</text>
+  <text x="600" y="340" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="600" font-size="32" fill="#24303b">Calm Online Kids Games for Ages 3+</text>
+  <text x="600" y="400" text-anchor="middle" font-family="system-ui, sans-serif" font-weight="500" font-size="24" fill="#888">No ads • No tracking • Just learning through play</text>
+</svg>

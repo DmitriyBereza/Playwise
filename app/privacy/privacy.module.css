@@ -1,0 +1,47 @@
+.container {
+  min-height: 100vh;
+  padding: 24px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.back {
+  margin-bottom: 14px;
+}
+
+.back a {
+  display: inline-block;
+  background: #d8f1da;
+  border: 2px solid #b7dfbb;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 800;
+}
+
+.card {
+  background: #fffefb;
+  border: 3px solid #e8dcff;
+  border-radius: 26px;
+  padding: 28px 24px;
+  box-shadow: 0 12px 28px #987ab726;
+}
+
+.card h1 {
+  margin: 0 0 16px;
+  font-size: 1.6rem;
+}
+
+.card ul {
+  padding-left: 20px;
+  margin: 0 0 16px;
+}
+
+.card li {
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.card p {
+  margin: 0;
+  color: #666;
+}

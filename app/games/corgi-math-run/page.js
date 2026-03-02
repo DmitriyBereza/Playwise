@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { useI18n } from '../../../lib/i18n/I18nProvider';
+import ErrorBoundary from '../../../components/ErrorBoundary';
 import CorgiMathRunGame from '../../../games/corgi-math-run/CorgiMathRunGame';
+import { useI18n } from '../../../lib/i18n/I18nProvider';
 import styles from '../../portal.module.css';
 
 export default function CorgiMathRunPage() {
@@ -13,7 +14,9 @@ export default function CorgiMathRunPage() {
       <div className={styles.gameBack}>
         <Link href="/">{t('common.backToPortal')}</Link>
       </div>
-      <CorgiMathRunGame />
+      <ErrorBoundary fallbackTitle={t('common.errorTitle')} retryLabel={t('common.tryAgain')}>
+        <CorgiMathRunGame />
+      </ErrorBoundary>
     </main>
   );
 }

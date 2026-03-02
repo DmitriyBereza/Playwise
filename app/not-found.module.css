@@ -1,0 +1,44 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.card {
+  text-align: center;
+  background: #fffefb;
+  border: 3px solid #e8dcff;
+  border-radius: 26px;
+  padding: 40px 32px;
+  box-shadow: 0 12px 28px #987ab726;
+  max-width: 400px;
+}
+
+.emoji {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.card h1 {
+  margin: 0 0 8px;
+  font-size: 3rem;
+  color: #6f62a4;
+}
+
+.card p {
+  margin: 0 0 20px;
+  font-size: 1.1rem;
+}
+
+.homeLink {
+  display: inline-block;
+  background: #d8f1da;
+  border: 2px solid #b7dfbb;
+  border-radius: 999px;
+  padding: 10px 20px;
+  font-weight: 800;
+  font-size: 1rem;
+}
