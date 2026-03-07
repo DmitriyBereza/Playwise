@@ -30,6 +30,16 @@ export const gamesCatalog = [
     path: '/games/train-track-builder',
   },
   {
+    slug: 'train-station-builder',
+    titleKey: 'games.trainStationBuilder.title',
+    descriptionKey: 'games.trainStationBuilder.description',
+    ageKey: 'ages.3plus',
+    ageGroup: '3plus',
+    image: '/games/train-station-builder-preview.svg',
+    skills: ['skills.logic', 'skills.spatial', 'skills.planning'],
+    path: '/games/train-station-builder',
+  },
+  {
     slug: 'typing-balloons',
     titleKey: 'games.typingBalloons.title',
     descriptionKey: 'games.typingBalloons.description',

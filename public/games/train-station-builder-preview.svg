@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <!-- Sky -->
+  <rect width="400" height="300" rx="12" fill="#E8F0FE"/>
+
+  <!-- Buildings background -->
+  <rect x="20" y="120" width="40" height="100" rx="3" fill="#c8d6e5"/>
+  <rect x="70" y="100" width="35" height="120" rx="3" fill="#b8c6d5"/>
+  <rect x="115" y="140" width="50" height="80" rx="3" fill="#c8d6e5"/>
+  <rect x="300" y="110" width="45" height="110" rx="3" fill="#b8c6d5"/>
+  <rect x="350" y="130" width="35" height="90" rx="3" fill="#c8d6e5"/>
+
+  <!-- Platform -->
+  <rect x="30" y="220" width="340" height="40" rx="6" fill="#E8DCC8" stroke="#C8B896" stroke-width="2"/>
+
+  <!-- Track -->
+  <rect x="0" y="268" width="400" height="8" fill="#8B7355"/>
+  <line x1="0" y1="272" x2="400" y2="272" stroke="#A0926B" stroke-width="2" stroke-dasharray="20 10"/>
+
+  <!-- Benches -->
+  <rect x="60" y="232" width="30" height="16" rx="4" fill="#8B6F47"/>
+  <rect x="130" y="232" width="30" height="16" rx="4" fill="#8B6F47"/>
+  <rect x="250" y="232" width="30" height="16" rx="4" fill="#8B6F47"/>
+
+  <!-- Shelter -->
+  <rect x="190" y="208" width="40" height="4" rx="2" fill="#5BC0EB"/>
+  <rect x="195" y="212" width="2" height="36" fill="#5BC0EB"/>
+  <rect x="223" y="212" width="2" height="36" fill="#5BC0EB"/>
+
+  <!-- Elevator -->
+  <rect x="310" y="210" width="24" height="38" rx="3" fill="#A78BFA" stroke="#7C6BC4" stroke-width="1.5"/>
+  <text x="322" y="235" text-anchor="middle" font-size="16" fill="white">E</text>
+
+  <!-- Screen -->
+  <rect x="145" y="196" width="28" height="18" rx="3" fill="#333"/>
+  <rect x="148" y="199" width="22" height="12" rx="2" fill="#4ade80"/>
+  <rect x="157" y="214" width="4" height="10" fill="#333"/>
+
+  <!-- Waiting passengers -->
+  <circle cx="80" cy="200" r="8" fill="#FFD93D"/>
+  <rect x="74" y="208" width="12" height="14" rx="3" fill="#5BC0EB"/>
+
+  <circle cx="200" cy="200" r="8" fill="#FFD93D"/>
+  <rect x="194" y="208" width="12" height="14" rx="3" fill="#FF8FAB"/>
+
+  <circle cx="270" cy="200" r="8" fill="#FFD93D"/>
+  <rect x="264" y="208" width="12" height="14" rx="3" fill="#A78BFA"/>
+
+  <!-- Flower pot -->
+  <rect x="100" y="236" width="14" height="10" rx="2" fill="#D97706"/>
+  <circle cx="107" cy="232" r="6" fill="#4ade80"/>
+
+  <!-- Train (small, approaching) -->
+  <rect x="-10" y="254" width="50" height="18" rx="4" fill="#D94040"/>
+  <rect x="40" y="256" width="30" height="14" rx="3" fill="#4AAF5A"/>
+  <circle cx="5" cy="274" r="4" fill="#333"/>
+  <circle cx="25" cy="274" r="4" fill="#333"/>
+  <circle cx="50" cy="274" r="4" fill="#333"/>
+</svg>
