@@ -1,16 +1,27 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useI18n } from '../../lib/i18n/I18nProvider';
 import LocaleSwitcher from '../../components/LocaleSwitcher';
 import { generateLevel, validatePath } from './gridLogic';
-import { rotateClockwise, getConnections, OPPOSITE, DIR_DELTA } from './pieces';
+import { rotateClockwise } from './pieces';
 import styles from './trainTrackBuilder.module.css';
+
+// Dynamic import — Three.js needs window/document
+const TrackScene = dynamic(() => import('./scene/TrackScene'), { ssr: false });
 
 const HIGH_SCORE_KEY = 'trainTrackBuilderHighScoreV1';
 const MAX_LEVEL_KEY = 'trainTrackBuilderMaxLevelV1';
+const SKIN_KEY = 'trainTrackBuilderSkinV1';
 
 const CONFETTI_COLORS = ['#D94040', '#FFD93D', '#4AAF5A', '#5BC0EB', '#FF8FAB', '#A78BFA'];
+
+const SKIN_OPTIONS = [
+  { key: 'countryside', label: 'Countryside' },
+  { key: 'industrial', label: 'Industrial' },
+  { key: 'desert', label: 'Desert' },
+];
 
 export default function TrainTrackBuilderGame() {
   const { t } = useI18n();
@@ -30,15 +41,9 @@ export default function TrainTrackBuilderGame() {
   const [highScore, setHighScore] = useState(0);
   const [maxLevel, setMaxLevel] = useState(1);
   const [levelScore, setLevelScore] = useState(0);
-  const [boardAnim, setBoardAnim] = useState('');
-
-  // Train animation state
-  const [trainPos, setTrainPos] = useState(null); // { x, y, angle }
-  const [steamPuffs, setSteamPuffs] = useState([]);
+  const [skin, setSkin] = useState('countryside');
   const [showConfetti, setShowConfetti] = useState(false);
 
-  const boardRef = useRef(null);
-  const trainTimerRef = useRef(null);
   const lastTapRef = useRef({ id: null, time: 0 });
 
   // Load persisted data
@@ -48,6 +53,8 @@ export default function TrainTrackBuilderGame() {
       if (hs) setHighScore(parseInt(hs, 10) || 0);
       const ml = window.localStorage.getItem(MAX_LEVEL_KEY);
       if (ml) setMaxLevel(parseInt(ml, 10) || 1);
+      const sk = window.localStorage.getItem(SKIN_KEY);
+      if (sk) setSkin(sk);
     } catch { /* ignore */ }
   }, []);
 
@@ -65,6 +72,12 @@ export default function TrainTrackBuilderGame() {
     } catch { /* ignore */ }
   }, [highScore, maxLevel]);
 
+  // Handle skin change
+  const handleSkinChange = useCallback((newSkin) => {
+    setSkin(newSkin);
+    try { window.localStorage.setItem(SKIN_KEY, newSkin); } catch { /* ignore */ }
+  }, []);
+
   // Start a level
   const startLevel = useCallback((lvl) => {
     const data = generateLevel(lvl);
@@ -76,10 +89,7 @@ export default function TrainTrackBuilderGame() {
     setStationB(data.stationB);
     setSelectedPieceId(null);
     setValidPathResult(null);
-    setTrainPos(null);
-    setSteamPuffs([]);
     setPhase('building');
-    setBoardAnim('fadeIn');
   }, []);
 
   // Handle start button
@@ -104,7 +114,7 @@ export default function TrainTrackBuilderGame() {
     setSelectedPieceId((prev) => (prev === pieceId ? null : pieceId));
   }, [phase, pool]);
 
-  // Place a piece on the grid
+  // Place a piece on the grid (called from 3D scene click)
   const handleCellClick = useCallback((r, c) => {
     if (phase !== 'building') return;
     const cell = grid[r][c];
@@ -121,7 +131,6 @@ export default function TrainTrackBuilderGame() {
         newGrid[r][c].piece = null;
         newGrid[r][c].rotation = 0;
         setGrid(newGrid);
-        // Find pool piece to un-use
         setPool((prev) =>
           prev.map((p) =>
             p.used && p.pieceType === removedPiece ? { ...p, used: false } : p
@@ -161,102 +170,32 @@ export default function TrainTrackBuilderGame() {
     lastTapRef.current = { id: null, time: 0 };
   }, [phase, grid, selectedPieceId, pool, revalidate]);
 
-  // "Go!" button — animate train
+  // "Go!" button — start train animation in 3D
   const handleGo = useCallback(() => {
     if (!validPathResult?.valid || phase !== 'building') return;
     setPhase('running');
     setSelectedPieceId(null);
+  }, [validPathResult, phase]);
 
-    const path = validPathResult.path;
-    if (!boardRef.current || path.length < 2) return;
+  // Called when the 3D train arrives at station B
+  const handleTrainArrived = useCallback(() => {
+    const unusedPieces = pool.filter((p) => !p.used).length;
+    const ls = 10 + unusedPieces * 2 + level * 5;
+    setLevelScore(ls);
+    const newTotal = score + ls;
+    setScore(newTotal);
+    persistStats(newTotal, level);
 
-    const boardRect = boardRef.current.getBoundingClientRect();
-    const cellWidth = boardRect.width / cols;
-    const cellHeight = boardRect.height / rows;
-
-    // Build animation waypoints
-    const waypoints = path.map((cell, i) => {
-      const x = cell.col * cellWidth + cellWidth / 2 - 20; // center train (40px wide)
-      const y = cell.row * cellHeight + cellHeight / 2 - 15; // center train (30px tall)
-      // Calculate angle based on direction to next cell
-      let angle = 0;
-      if (i < path.length - 1) {
-        const next = path[i + 1];
-        const dx = next.col - cell.col;
-        const dy = next.row - cell.row;
-        if (dx > 0) angle = 0;      // right
-        else if (dx < 0) angle = 180; // left
-        else if (dy > 0) angle = 90;  // down
-        else angle = -90;             // up
-      } else if (i > 0) {
-        // Last cell: keep previous angle
-        const prev = path[i - 1];
-        const dx = cell.col - prev.col;
-        const dy = cell.row - prev.row;
-        if (dx > 0) angle = 0;
-        else if (dx < 0) angle = 180;
-        else if (dy > 0) angle = 90;
-        else angle = -90;
-      }
-      return { x, y, angle };
-    });
-
-    // Animate step by step
-    let step = 0;
-    setTrainPos(waypoints[0]);
-
-    const steamId = { current: 0 };
-
-    const advance = () => {
-      step++;
-      if (step >= waypoints.length) {
-        // Train arrived!
-        clearInterval(trainTimerRef.current);
-        trainTimerRef.current = null;
-
-        // Calculate score
-        const unusedPieces = pool.filter((p) => !p.used).length;
-        const ls = 10 + unusedPieces * 2 + level * 5;
-        setLevelScore(ls);
-        const newTotal = score + ls;
-        setScore(newTotal);
-        persistStats(newTotal, level);
-
-        // Celebrate
-        setShowConfetti(true);
-        setPhase('celebrating');
-        return;
-      }
-      setTrainPos(waypoints[step]);
-
-      // Spawn steam puff every other step
-      if (step % 2 === 0) {
-        const wp = waypoints[step];
-        setSteamPuffs((prev) => [
-          ...prev.slice(-6),
-          { id: steamId.current++, x: wp.x + 5, y: wp.y - 10 },
-        ]);
-      }
-    };
-
-    trainTimerRef.current = setInterval(advance, 500);
-
-    return () => {
-      if (trainTimerRef.current) clearInterval(trainTimerRef.current);
-    };
-  }, [validPathResult, phase, cols, rows, pool, level, score, persistStats]);
+    setShowConfetti(true);
+    setPhase('celebrating');
+  }, [pool, level, score, persistStats]);
 
   // Next level
   const handleNextLevel = useCallback(() => {
     setShowConfetti(false);
-    setTrainPos(null);
-    setSteamPuffs([]);
     const next = level + 1;
     setLevel(next);
-    setBoardAnim('fadeOut');
-    setTimeout(() => {
-      startLevel(next);
-    }, 400);
+    startLevel(next);
   }, [level, startLevel]);
 
   // Reset level
@@ -264,66 +203,75 @@ export default function TrainTrackBuilderGame() {
     startLevel(level);
   }, [level, startLevel]);
 
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (trainTimerRef.current) clearInterval(trainTimerRef.current);
-    };
-  }, []);
-
   // Count placed pieces on the grid
   const placedCount = useMemo(() => {
     return grid.reduce((acc, row) => acc + row.filter((cell) => cell.piece).length, 0);
   }, [grid]);
-
-  // Map of "row,col" → path index for staggered glow animation
-  const pathIndexMap = useMemo(() => {
-    if (!validPathResult?.valid || !validPathResult.path) return {};
-    const map = {};
-    validPathResult.path.forEach((cell, i) => {
-      map[`${cell.row},${cell.col}`] = i;
-    });
-    return map;
-  }, [validPathResult]);
 
   // Get status message
   const statusMessage = useMemo(() => {
     if (phase === 'idle') return t('trainGame.status.idle');
     if (phase === 'running') return t('trainGame.status.running');
     if (phase === 'celebrating') return t('trainGame.status.celebrating');
-    // building phase
     if (selectedPieceId) return t('trainGame.placePiece');
     if (validPathResult?.valid) return t('trainGame.pathComplete');
     if (placedCount > 0) return t('trainGame.status.rotateHint');
     return t('trainGame.selectPiece');
   }, [phase, selectedPieceId, validPathResult, placedCount, t]);
 
-  // Should highlight empty cells when piece selected
-  const shouldHighlight = phase === 'building' && selectedPieceId;
-
   // --- RENDER ---
 
   if (phase === 'idle') {
     return (
       <div className={styles.page}>
-        <img
-          className={styles.backgroundHills}
-          src="/games/train-track-builder/background-hills.svg"
-          alt=""
-          aria-hidden="true"
-        />
-        <LocaleSwitcher />
-        <div className={styles.startScreen}>
-          <h1 className={styles.startTitle}>{t('trainGame.title')}</h1>
-          <p className={styles.startDesc}>{t('trainGame.status.idle')}</p>
-          {maxLevel > 1 && (
-            <p className={styles.levelBadge}>
-              {t('trainGame.maxLevel')}: {maxLevel} | {t('trainGame.record')}: {highScore}
-            </p>
-          )}
-          <button className={styles.btnStart} onClick={handleStart}>
-            {t('trainGame.start')}
-          </button>
+        <div className={styles.canvasWrapper}>
+          <TrackScene
+            grid={[]}
+            cols={4}
+            rows={3}
+            phase="idle"
+            skin={skin}
+            selectedPieceId={null}
+            validPathResult={null}
+            stationA={null}
+            stationB={null}
+            onCellClick={() => {}}
+            onTrainArrived={() => {}}
+          />
+        </div>
+
+        <div className={styles.overlay}>
+          <LocaleSwitcher />
+          <div className={styles.spacer} />
+          <div className={styles.startScreen}>
+            <h1 className={styles.startTitle}>{t('trainGame.title')}</h1>
+            <p className={styles.startDesc}>{t('trainGame.status.idle')}</p>
+
+            <div className={styles.skinSection}>
+              <span className={styles.skinLabel}>Theme</span>
+              <div className={styles.skinOptions}>
+                {SKIN_OPTIONS.map((s) => (
+                  <button
+                    key={s.key}
+                    className={`${styles.skinOption} ${skin === s.key ? styles.skinOptionActive : ''}`}
+                    onClick={() => handleSkinChange(s.key)}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {maxLevel > 1 && (
+              <p className={styles.levelBadge}>
+                {t('trainGame.maxLevel')}: {maxLevel} | {t('trainGame.record')}: {highScore}
+              </p>
+            )}
+            <button className={styles.btnStart} onClick={handleStart}>
+              {t('trainGame.start')}
+            </button>
+          </div>
+          <div className={styles.spacer} />
         </div>
       </div>
     );
@@ -331,257 +279,106 @@ export default function TrainTrackBuilderGame() {
 
   return (
     <div className={styles.page}>
-      <img
-        className={styles.backgroundHills}
-        src="/games/train-track-builder/background-hills.svg"
-        alt=""
-        aria-hidden="true"
-      />
-
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.titleSection}>
-          <h1 className={styles.title}>{t('trainGame.title')}</h1>
-          <span className={styles.levelBadge}>{t('trainGame.level', { level })}</span>
-        </div>
-        <div className={styles.stats}>
-          <div className={styles.stat}>
-            <span>{t('trainGame.score')}</span>
-            <span className={styles.statValue}>{score}</span>
-          </div>
-          <div className={styles.stat}>
-            <span>{t('trainGame.record')}</span>
-            <span className={styles.statValue}>{highScore}</span>
-          </div>
-        </div>
-        <LocaleSwitcher />
+      {/* 3D Canvas — background layer */}
+      <div className={styles.canvasWrapper}>
+        <TrackScene
+          grid={grid}
+          cols={cols}
+          rows={rows}
+          phase={phase}
+          skin={skin}
+          selectedPieceId={selectedPieceId}
+          validPathResult={validPathResult}
+          stationA={stationA}
+          stationB={stationB}
+          onCellClick={handleCellClick}
+          onTrainArrived={handleTrainArrived}
+        />
       </div>
 
-      {/* Status */}
-      <div className={styles.statusBar}>{statusMessage}</div>
-
-      {/* Board */}
-      <div
-        className={`${styles.boardWrapper} ${boardAnim === 'fadeOut' ? styles.boardFadeOut : ''} ${boardAnim === 'fadeIn' ? styles.boardFadeIn : ''}`}
-        onAnimationEnd={() => setBoardAnim('')}
-      >
-        <div
-          ref={boardRef}
-          className={styles.board}
-          style={{
-            gridTemplateColumns: `repeat(${cols}, 1fr)`,
-            gridTemplateRows: `repeat(${rows}, 1fr)`,
-          }}
-        >
-          {grid.map((row, r) =>
-            row.map((cell, c) => {
-              const isStation = cell.type === 'stationA' || cell.type === 'stationB';
-              const hasObstacle = !!cell.obstacle;
-              const hasPiece = !!cell.piece;
-              const canPlace = !isStation && !hasObstacle && !hasPiece && cell.type === 'empty';
-              const highlight = shouldHighlight && canPlace;
-              const pathIdx = pathIndexMap[`${r},${c}`];
-
-              // Fork dots: show on placed pieces (building phase only)
-              const connDots = [];
-              if (hasPiece && phase === 'building') {
-                const exitDirs = getConnections(cell.piece, cell.rotation);
-                for (const dir of exitDirs) {
-                  const { dr, dc } = DIR_DELTA[dir];
-                  const nr2 = r + dr;
-                  const nc2 = c + dc;
-                  let connected = false;
-                  if (nr2 >= 0 && nr2 < rows && nc2 >= 0 && nc2 < cols) {
-                    const nb = grid[nr2][nc2];
-                    const opp = OPPOSITE[dir];
-                    if (nb.type === 'stationA') connected = opp === 'right';
-                    else if (nb.type === 'stationB') connected = opp === 'left';
-                    else if (nb.piece) connected = getConnections(nb.piece, nb.rotation).includes(opp);
-                  }
-                  connDots.push({ dir, connected });
-                }
-              }
-
-              let cellClass = styles.cell;
-              if (isStation) cellClass += ` ${styles.cellStation}`;
-              else if (hasObstacle) cellClass += ` ${styles.cellGrass} ${styles.cellObstacle}`;
-              else if (hasPiece) cellClass += ` ${styles.cellEmpty}`;
-              else if (canPlace) cellClass += ` ${styles.cellEmpty}`;
-              else cellClass += ` ${styles.cellGrass}`;
-
-              if (highlight) cellClass += ` ${styles.cellHighlight}`;
-
-              return (
-                <div
-                  key={`${r}-${c}`}
-                  className={cellClass}
-                  onClick={() => handleCellClick(r, c)}
-                  role="button"
-                  tabIndex={phase === 'building' ? 0 : -1}
-                  aria-label={getCellLabel(cell, r, c, t)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleCellClick(r, c);
-                    }
-                  }}
-                >
-                  {/* Station image */}
-                  {cell.type === 'stationA' && (
-                    <img
-                      className={styles.stationImg}
-                      src="/games/train-track-builder/station-a.svg"
-                      alt="Station A"
-                    />
-                  )}
-                  {cell.type === 'stationB' && (
-                    <img
-                      className={styles.stationImg}
-                      src="/games/train-track-builder/station-b.svg"
-                      alt="Station B"
-                    />
-                  )}
-
-                  {/* Obstacle image */}
-                  {hasObstacle && (
-                    <img
-                      className={styles.obstacleImg}
-                      src={`/games/train-track-builder/obstacle-${cell.obstacle}.svg`}
-                      alt={cell.obstacle}
-                    />
-                  )}
-
-                  {/* Rail piece */}
-                  {hasPiece && (
-                    <img
-                      className={`${styles.railPiece} ${styles.railPieceEnter}`}
-                      src={`/games/train-track-builder/rail-${cell.piece}.svg`}
-                      alt={cell.piece}
-                      style={{ transform: `rotate(${cell.rotation}deg)` }}
-                    />
-                  )}
-
-                  {/* Fork / connection dots at rail exit edges */}
-                  {connDots.map(({ dir, connected }) => {
-                    const capDir = dir[0].toUpperCase() + dir.slice(1);
-                    return (
-                      <div
-                        key={`dot-${dir}`}
-                        className={`${styles.connDot} ${styles[`connDot${capDir}`]} ${connected ? styles.connDotConnected : styles.connDotOpen}`}
-                      />
-                    );
-                  })}
-
-                  {/* Connected path glow overlay */}
-                  {pathIdx !== undefined && (
-                    <div
-                      key={`glow-${validPathResult?.valid}`}
-                      className={styles.trackGlow}
-                      style={{ animationDelay: `${pathIdx * 80}ms` }}
-                    />
-                  )}
-                </div>
-              );
-            })
-          )}
-
-          {/* Train overlay */}
-          {trainPos && (
-            <div className={styles.trainContainer}>
-              <div
-                className={styles.train}
-                style={{
-                  transform: `translate(${trainPos.x}px, ${trainPos.y}px) rotate(${trainPos.angle}deg)`,
-                  transition: 'transform 0.45s ease-in-out',
-                }}
-              >
-                <img
-                  className={styles.trainImg}
-                  src="/games/train-track-builder/train-locomotive.svg"
-                  alt="Train"
-                />
-              </div>
-              {/* Steam puffs */}
-              {steamPuffs.map((puff) => (
-                <img
-                  key={puff.id}
-                  className={styles.steamPuff}
-                  src="/games/train-track-builder/steam-puff.svg"
-                  alt=""
-                  aria-hidden="true"
-                  style={{ left: puff.x, top: puff.y }}
-                />
-              ))}
+      {/* HTML overlay */}
+      <div className={styles.overlay}>
+        {/* Header */}
+        <div className={styles.header}>
+          <div className={styles.titleSection}>
+            <h1 className={styles.title}>{t('trainGame.title')}</h1>
+            <span className={styles.levelBadge}>{t('trainGame.level', { level })}</span>
+          </div>
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <span>{t('trainGame.score')}</span>
+              <span className={styles.statValue}>{score}</span>
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Pool */}
-      {phase === 'building' && (
-        <div className={styles.poolSection}>
-          <div className={styles.poolLabel}>{t('trainGame.pieces')}</div>
-          <div className={styles.pool}>
-            {pool.map((piece) => {
-              let cls = styles.poolPiece;
-              if (piece.used) cls += ` ${styles.poolPieceUsed}`;
-              if (selectedPieceId === piece.id) cls += ` ${styles.poolPieceSelected}`;
-
-              return (
-                <button
-                  key={piece.id}
-                  className={cls}
-                  onClick={() => handlePoolClick(piece.id)}
-                  aria-label={t(`trainGame.pool.${piece.pieceType}`)}
-                  disabled={piece.used}
-                >
-                  <img
-                    className={styles.poolPieceImg}
-                    src={`/games/train-track-builder/rail-${piece.pieceType}.svg`}
-                    alt=""
-                    aria-hidden="true"
-                  />
-                  <span className={styles.poolPieceLabel}>
-                    {t(`trainGame.pool.${piece.pieceType}`)}
-                  </span>
-                </button>
-              );
-            })}
+            <div className={styles.stat}>
+              <span>{t('trainGame.record')}</span>
+              <span className={styles.statValue}>{highScore}</span>
+            </div>
           </div>
+          <LocaleSwitcher />
         </div>
-      )}
 
-      {/* Action buttons */}
-      <div className={styles.actions}>
+        {/* Status */}
+        <div className={styles.statusBar}>{statusMessage}</div>
+
+        <div className={styles.spacer} />
+
+        {/* Pool */}
         {phase === 'building' && (
-          <>
-            <button
-              className={`${styles.btnGo} ${validPathResult?.valid ? styles.btnGoReady : ''}`}
-              disabled={!validPathResult?.valid}
-              onClick={handleGo}
-            >
-              {t('trainGame.go')}
-            </button>
-            <button className={styles.btnSecondary} onClick={handleResetLevel}>
-              {t('trainGame.resetLevel')}
-            </button>
-          </>
+          <div className={styles.poolSection}>
+            <div className={styles.poolLabel}>{t('trainGame.pieces')}</div>
+            <div className={styles.pool}>
+              {pool.map((piece) => {
+                let cls = styles.poolPiece;
+                if (piece.used) cls += ` ${styles.poolPieceUsed}`;
+                if (selectedPieceId === piece.id) cls += ` ${styles.poolPieceSelected}`;
+
+                return (
+                  <button
+                    key={piece.id}
+                    className={cls}
+                    onClick={() => handlePoolClick(piece.id)}
+                    aria-label={t(`trainGame.pool.${piece.pieceType}`)}
+                    disabled={piece.used}
+                  >
+                    <span className={styles.poolPieceEmoji}>
+                      {piece.pieceType === 'straight' ? '━' : '╮'}
+                    </span>
+                    <span className={styles.poolPieceLabel}>
+                      {t(`trainGame.pool.${piece.pieceType}`)}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
-        <button
-          className={styles.btnSecondary}
-          onClick={() => {
-            setPhase('idle');
-            setTrainPos(null);
-            setSteamPuffs([]);
-            setShowConfetti(false);
-            if (trainTimerRef.current) {
-              clearInterval(trainTimerRef.current);
-              trainTimerRef.current = null;
-            }
-          }}
-        >
-          {t('trainGame.backToMenu')}
-        </button>
+
+        {/* Action buttons */}
+        <div className={styles.actions}>
+          {phase === 'building' && (
+            <>
+              <button
+                className={`${styles.btnGo} ${validPathResult?.valid ? styles.btnGoReady : ''}`}
+                disabled={!validPathResult?.valid}
+                onClick={handleGo}
+              >
+                {t('trainGame.go')}
+              </button>
+              <button className={styles.btnSecondary} onClick={handleResetLevel}>
+                {t('trainGame.resetLevel')}
+              </button>
+            </>
+          )}
+          <button
+            className={styles.btnSecondary}
+            onClick={() => {
+              setPhase('idle');
+              setShowConfetti(false);
+            }}
+          >
+            {t('trainGame.backToMenu')}
+          </button>
+        </div>
       </div>
 
       {/* Confetti */}
@@ -621,12 +418,4 @@ export default function TrainTrackBuilderGame() {
       )}
     </div>
   );
-}
-
-function getCellLabel(cell, r, c, t) {
-  if (cell.type === 'stationA') return 'Station A';
-  if (cell.type === 'stationB') return 'Station B';
-  if (cell.obstacle) return cell.obstacle;
-  if (cell.piece) return `${t(`trainGame.pool.${cell.piece}`)} — ${t('trainGame.tapToRotate')}`;
-  return `Row ${r + 1}, Column ${c + 1}`;
 }

@@ -7,10 +7,12 @@ import { CONNECTIONS, OPPOSITE, DIR_DELTA, getConnections } from './pieces';
 // --- Grid sizing per level ---
 
 function getGridSize(level) {
-  if (level <= 3) return { cols: 4, rows: 3 };
-  if (level <= 6) return { cols: 5, rows: 4 };
-  if (level <= 10) return { cols: 6, rows: 4 };
-  return { cols: 7, rows: 5 };
+  if (level <= 2) return { cols: 4, rows: 3 };  // tutorial — straight-line paths
+  if (level <= 4) return { cols: 5, rows: 3 };  // introduce curves
+  if (level <= 6) return { cols: 5, rows: 4 };  // taller grids
+  if (level <= 8) return { cols: 6, rows: 4 };  // wider, more complex
+  if (level <= 10) return { cols: 6, rows: 5 }; // larger area
+  return { cols: 7, rows: 5 };                   // full complexity
 }
 
 // --- Level generation ---
@@ -32,12 +34,24 @@ export function generateLevel(levelNumber) {
     grid.push(row);
   }
 
-  // Place stations
-  const stationARow = levelNumber <= 3 ? Math.floor(rows / 2) : randInt(0, rows - 1);
-  let stationBRow = levelNumber <= 3 ? stationARow : randInt(0, rows - 1);
-  // Avoid same row for harder levels to force curves
-  if (levelNumber > 3 && stationBRow === stationARow && rows > 2) {
-    stationBRow = (stationARow + 1) % rows;
+  // Place stations — varied placement by level
+  let stationARow, stationBRow;
+  if (levelNumber <= 2) {
+    // Tutorial: same row (straight path)
+    stationARow = Math.floor(rows / 2);
+    stationBRow = stationARow;
+  } else if (levelNumber <= 4) {
+    // Adjacent rows (force one curve)
+    stationARow = Math.floor(rows / 2);
+    stationBRow = Math.min(stationARow + 1, rows - 1);
+  } else {
+    // Any row on left/right edges
+    stationARow = randInt(0, rows - 1);
+    stationBRow = randInt(0, rows - 1);
+    // Ensure different rows for variety
+    if (stationBRow === stationARow && rows > 2) {
+      stationBRow = (stationARow + 1 + randInt(0, rows - 3)) % rows;
+    }
   }
 
   const stationA = { row: stationARow, col: 0 };
@@ -66,20 +80,29 @@ export function generateLevel(levelNumber) {
     pathPieces.push({ pieceType, rotation, row: cell.row, col: cell.col });
   }
 
-  // Place obstacles
-  const emptyCells = [];
+  // Place obstacles with structured patterns + random fill
   const pathSet = new Set(solutionPath.map((c) => `${c.row},${c.col}`));
+  const obstacleTypes = levelNumber >= 5
+    ? ['tree', 'rock', 'pond', 'house', 'signal']
+    : ['tree', 'rock', 'pond'];
+
+  // Structured obstacle patterns for higher levels
+  if (levelNumber >= 3) {
+    placeObstaclePatterns(grid, pathSet, levelNumber, cols, rows, obstacleTypes);
+  }
+
+  // Random fill remaining empty cells
+  const emptyCells = [];
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
-      if (!pathSet.has(`${r},${c}`) && grid[r][c].type === 'empty') {
+      if (!pathSet.has(`${r},${c}`) && grid[r][c].type === 'empty' && !grid[r][c].obstacle) {
         emptyCells.push({ row: r, col: c });
       }
     }
   }
 
-  const maxObstacles = Math.floor(emptyCells.length * 0.3);
-  const numObstacles = Math.min(Math.floor(levelNumber * 0.8), maxObstacles);
-  const obstacleTypes = ['tree', 'rock', 'pond'];
+  const maxObstacles = Math.floor(emptyCells.length * 0.35);
+  const numObstacles = Math.min(Math.floor(levelNumber * 0.6), maxObstacles);
 
   shuffle(emptyCells);
   for (let i = 0; i < numObstacles && i < emptyCells.length; i++) {
@@ -94,16 +117,18 @@ export function generateLevel(levelNumber) {
     used: false,
   }));
 
-  // Add distractor pieces for higher levels
-  if (levelNumber >= 4) {
-    const distractorCount = Math.min(2, Math.floor((levelNumber - 3) / 2) + 1);
-    for (let d = 0; d < distractorCount; d++) {
-      pool.push({
-        id: `distractor-${d}`,
-        pieceType: Math.random() < 0.5 ? 'straight' : 'curve',
-        used: false,
-      });
-    }
+  // Add distractor pieces — scaled by level
+  let distractorCount = 0;
+  if (levelNumber >= 4 && levelNumber <= 5) distractorCount = 1;
+  else if (levelNumber >= 6 && levelNumber <= 8) distractorCount = 2;
+  else if (levelNumber >= 9) distractorCount = 3;
+
+  for (let d = 0; d < distractorCount; d++) {
+    pool.push({
+      id: `distractor-${d}`,
+      pieceType: d % 2 === 0 ? 'straight' : 'curve',
+      used: false,
+    });
   }
 
   shuffle(pool);
@@ -267,6 +292,58 @@ export function validatePath(grid, stationA, stationB, rows, cols) {
   }
 
   return { valid: false, path: null };
+}
+
+// --- Obstacle patterns ---
+
+function placeObstaclePatterns(grid, pathSet, levelNumber, cols, rows, obstacleTypes) {
+  const canPlace = (r, c) =>
+    r >= 0 && r < rows && c >= 0 && c < cols
+    && !pathSet.has(`${r},${c}`)
+    && grid[r][c].type === 'empty'
+    && !grid[r][c].obstacle;
+
+  const placeOne = (r, c) => {
+    if (!canPlace(r, c)) return;
+    grid[r][c].obstacle = obstacleTypes[randInt(0, obstacleTypes.length - 1)];
+  };
+
+  // Choose pattern based on level
+  const patternRoll = levelNumber % 4;
+
+  if (patternRoll === 0 && levelNumber >= 3) {
+    // Corridor: line of obstacles in a row
+    const midRow = Math.floor(rows / 2);
+    const startCol = Math.max(1, Math.floor(cols / 4));
+    const endCol = Math.min(cols - 2, Math.floor(cols * 3 / 4));
+    for (let c = startCol; c <= endCol; c++) {
+      placeOne(midRow, c);
+    }
+  } else if (patternRoll === 1 && levelNumber >= 5) {
+    // Island: cluster in center
+    const cr = Math.floor(rows / 2);
+    const cc = Math.floor(cols / 2);
+    placeOne(cr, cc);
+    placeOne(cr - 1, cc);
+    placeOne(cr + 1, cc);
+    placeOne(cr, cc - 1);
+    placeOne(cr, cc + 1);
+  } else if (patternRoll === 2 && levelNumber >= 7) {
+    // Border: obstacles along top or bottom edge
+    const edgeRow = randInt(0, 1) === 0 ? 0 : rows - 1;
+    for (let c = 1; c < cols - 1; c++) {
+      if (randInt(0, 2) > 0) placeOne(edgeRow, c);
+    }
+  } else if (patternRoll === 3 && levelNumber >= 9) {
+    // Maze: multiple small clusters
+    for (let k = 0; k < 3; k++) {
+      const cr = randInt(0, rows - 1);
+      const cc = randInt(1, cols - 2);
+      placeOne(cr, cc);
+      if (cr > 0) placeOne(cr - 1, cc);
+      if (cc < cols - 2) placeOne(cr, cc + 1);
+    }
+  }
 }
 
 // --- Helpers ---

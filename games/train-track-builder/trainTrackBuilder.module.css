@@ -1,24 +1,47 @@
 .page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #D4EEFF 0%, #F0F8FF 100%);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  min-height: 100dvh;
+  background: linear-gradient(180deg, #D4EEFF 0%, #F0F8FF 60%, #E8F5E9 100%);
   font-family: 'Nunito', 'Segoe UI', sans-serif;
   position: relative;
   overflow: hidden;
 }
 
-/* Background hills */
-.backgroundHills {
+/* 3D Canvas layer */
+.canvasWrapper {
   position: absolute;
-  bottom: 0;
+  top: 0;
   left: 0;
-  width: 100%;
-  height: 200px;
-  pointer-events: none;
+  right: 0;
+  bottom: 0;
   z-index: 0;
+}
+
+.canvasWrapper canvas {
+  touch-action: none;
+}
+
+/* HTML overlay layer */
+.overlay {
+  position: relative;
+  z-index: 1;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.overlay > * {
+  pointer-events: auto;
+}
+
+.spacer {
+  flex: 1;
+  pointer-events: none;
 }
 
 /* Header */
@@ -27,11 +50,15 @@
   align-items: center;
   justify-content: space-between;
   width: 100%;
-  max-width: 600px;
+  max-width: 620px;
   gap: 1rem;
   margin-bottom: 0.5rem;
-  z-index: 1;
   flex-wrap: wrap;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
 }
 
 .titleSection {
@@ -80,170 +107,19 @@
   font-weight: 600;
   min-height: 1.4rem;
   text-align: center;
-  margin-bottom: 0.5rem;
-  z-index: 1;
-}
-
-/* Board */
-.boardWrapper {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  max-width: 560px;
-}
-
-.board {
-  display: grid;
-  gap: 0;
-  width: 100%;
-  border-radius: 12px;
-  padding: 4px;
-  background: rgba(255,255,255,0.3);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-}
-
-.cell {
-  aspect-ratio: 1;
-  min-width: 48px;
+  margin-bottom: 0.3rem;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   border-radius: 8px;
-  position: relative;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  user-select: none;
-  -webkit-user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.cell:active {
-  transform: scale(0.95);
-}
-
-.cellEmpty {
-  background: #D4A574;
-  background-image: url('/games/train-track-builder/tile-empty.svg');
-  background-size: cover;
-}
-
-.cellGrass {
-  background: #7BC47F;
-  background-image: url('/games/train-track-builder/tile-grass.svg');
-  background-size: cover;
-  cursor: default;
-}
-
-.cellHighlight {
-  box-shadow: 0 0 0 3px #4AAF5A, 0 0 12px rgba(74, 175, 90, 0.4);
-  animation: cellPulse 1s infinite ease-in-out;
-}
-
-@keyframes cellPulse {
-  0%, 100% { box-shadow: 0 0 0 3px #4AAF5A, 0 0 12px rgba(74, 175, 90, 0.3); }
-  50% { box-shadow: 0 0 0 4px #4AAF5A, 0 0 18px rgba(74, 175, 90, 0.5); }
-}
-
-/* Connected path glow — sparks from A to B */
-@keyframes trackConnected {
-  0%   { opacity: 0; border-color: transparent; box-shadow: none; }
-  35%  { opacity: 1; border-color: #4ade80; box-shadow: inset 0 0 14px 4px #4ade8077, 0 0 10px 3px #4ade8055; }
-  65%  { border-color: #22c55ecc; box-shadow: inset 0 0 10px 3px #4ade8055; }
-  100% { opacity: 1; border-color: #22c55e99; box-shadow: inset 0 0 8px 2px #4ade8033; }
-}
-
-.trackGlow {
-  position: absolute;
-  inset: 0;
-  border-radius: 8px;
-  border: 2.5px solid #22c55e99;
-  box-shadow: inset 0 0 8px 2px #4ade8033;
-  background: rgba(74, 222, 128, 0.07);
-  pointer-events: none;
-  z-index: 6;
-  animation: trackConnected 0.45s ease-out both;
-}
-
-/* Connection fork dots — small bolt indicators at cell edges where rails exit */
-.connDot {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  z-index: 9;
-  pointer-events: none;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.45);
-  transition: background 0.18s ease, border-color 0.18s ease;
-}
-
-.connDotTop    { top: 1px;    left: 50%; transform: translateX(-50%); }
-.connDotBottom { bottom: 1px; left: 50%; transform: translateX(-50%); }
-.connDotLeft   { left: 1px;   top: 50%;  transform: translateY(-50%); }
-.connDotRight  { right: 1px;  top: 50%;  transform: translateY(-50%); }
-
-/* Green = rail connected to neighbour */
-.connDotConnected {
-  background: radial-gradient(circle at 35% 35%, #86efac, #16a34a);
-  border: 2px solid #14532d;
-  box-shadow: 0 0 5px #22c55e88, 0 1px 3px rgba(0,0,0,0.4);
-}
-
-/* Amber = open rail end, waiting for a neighbour */
-.connDotOpen {
-  background: radial-gradient(circle at 35% 35%, #fde68a, #d97706);
-  border: 2px solid #78350f;
-}
-
-/* Station cells */
-.cellStation {
-  background: #E8F5E9;
-  border-radius: 8px;
-  cursor: default;
-}
-
-.stationImg {
-  width: 90%;
-  height: 90%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-/* Obstacle cells */
-.cellObstacle {
-  cursor: default;
-}
-
-.obstacleImg {
-  width: 80%;
-  height: 80%;
-  object-fit: contain;
-  pointer-events: none;
-}
-
-/* Rail piece on cell — fills cell 100% so rails reach the edge and connect seamlessly */
-.railPiece {
-  width: 100%;
-  height: 100%;
-  transition: transform 0.25s ease;
-  pointer-events: none;
-}
-
-.railPieceEnter {
-  animation: piecePlace 0.2s ease-out;
-}
-
-@keyframes piecePlace {
-  0% { transform: scale(0.8); opacity: 0; }
-  100% { transform: scale(1); opacity: 1; }
+  padding: 0.3rem 1rem;
 }
 
 /* Pool area */
 .poolSection {
   width: 100%;
-  max-width: 560px;
-  margin-top: 0.75rem;
-  z-index: 1;
+  max-width: 620px;
+  margin-top: 0.5rem;
 }
 
 .poolLabel {
@@ -260,20 +136,23 @@
   gap: 8px;
   flex-wrap: wrap;
   padding: 8px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
   min-height: 60px;
   align-items: center;
 }
 
 .poolPiece {
-  width: 56px;
-  height: 56px;
+  width: 60px;
+  height: 60px;
   border-radius: 10px;
   border: 2px solid transparent;
   background: #F5E6C8;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -282,6 +161,7 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   position: relative;
+  gap: 1px;
 }
 
 .poolPiece:active {
@@ -305,27 +185,23 @@
   pointer-events: none;
 }
 
-.poolPieceImg {
-  width: 40px;
-  height: 40px;
+.poolPieceEmoji {
+  font-size: 1.5rem;
   pointer-events: none;
 }
 
 .poolPieceLabel {
-  position: absolute;
-  bottom: -1px;
-  right: 2px;
   font-size: 0.55rem;
   color: #999;
   font-weight: 600;
+  line-height: 1;
 }
 
 /* Action buttons */
 .actions {
   display: flex;
   gap: 0.5rem;
-  margin-top: 0.75rem;
-  z-index: 1;
+  margin-top: 0.5rem;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -371,9 +247,11 @@
   padding: 0.5rem 1.2rem;
   font-size: 0.85rem;
   font-weight: 700;
-  background: white;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   color: #555;
-  border: 2px solid #ddd;
+  border: 2px solid rgba(200, 200, 200, 0.6);
   border-radius: 10px;
   cursor: pointer;
   transition: transform 0.15s ease, border-color 0.15s ease;
@@ -387,44 +265,6 @@
   transform: scale(0.96);
 }
 
-/* Train animation */
-.trainContainer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.train {
-  position: absolute;
-  width: 40px;
-  height: 30px;
-  transition: none;
-}
-
-.trainImg {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-}
-
-/* Steam puffs */
-.steamPuff {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  pointer-events: none;
-  animation: steamFloat 1.2s ease-out forwards;
-}
-
-@keyframes steamFloat {
-  0% { transform: translateY(0) scale(0.5); opacity: 0.8; }
-  100% { transform: translateY(-30px) scale(1.5); opacity: 0; }
-}
-
 /* Celebration overlay */
 .celebration {
   position: fixed;
@@ -436,7 +276,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   z-index: 100;
   animation: fadeIn 0.3s ease;
 }
@@ -451,7 +291,7 @@
   border-radius: 20px;
   padding: 2rem 2.5rem;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
   animation: celebPop 0.4s ease-out;
 }
 
@@ -526,25 +366,6 @@
   }
 }
 
-/* Level transition */
-.boardFadeOut {
-  animation: boardFade 0.4s ease forwards;
-}
-
-@keyframes boardFade {
-  0% { opacity: 1; transform: scale(1); }
-  100% { opacity: 0; transform: scale(0.95); }
-}
-
-.boardFadeIn {
-  animation: boardAppear 0.4s ease forwards;
-}
-
-@keyframes boardAppear {
-  0% { opacity: 0; transform: scale(1.02); }
-  100% { opacity: 1; transform: scale(1); }
-}
-
 /* Start screen */
 .startScreen {
   display: flex;
@@ -592,9 +413,54 @@
   transform: scale(0.96);
 }
 
+/* Skin selector */
+.skinSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.skinLabel {
+  font-size: 0.85rem;
+  color: #777;
+  font-weight: 700;
+}
+
+.skinOptions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.skinOption {
+  padding: 0.4rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: white;
+  color: #555;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.skinOption:hover {
+  border-color: #bbb;
+}
+
+.skinOptionActive {
+  border-color: #6bcBef;
+  background: #E8F0FE;
+  color: #333;
+}
+
 /* Responsive */
 @media (max-width: 480px) {
   .page {
+    overflow-y: auto;
+  }
+
+  .overlay {
     padding: 0.5rem;
   }
 
@@ -602,18 +468,13 @@
     font-size: 1.1rem;
   }
 
-  .cell {
-    min-width: 40px;
-  }
-
   .poolPiece {
-    width: 48px;
-    height: 48px;
+    width: 50px;
+    height: 50px;
   }
 
-  .poolPieceImg {
-    width: 34px;
-    height: 34px;
+  .poolPieceEmoji {
+    font-size: 1.2rem;
   }
 
   .startTitle {
