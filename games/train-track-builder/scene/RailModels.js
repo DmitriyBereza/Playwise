@@ -60,25 +60,10 @@ function StraightRail({ colors }) {
 }
 
 function CurveRail({ colors }) {
-  // Curve connects bottom (positive Z) and right (positive X)
-  // Default orientation: 0 degrees = bottom-right curve
+  // Curve connects bottom (+Z, row+1) and right (+X, col+1) at rotation 0.
+  // Arc center is at (+0.5, +0.5) — bottom-right corner of the cell.
+  // The arc sweeps from the right edge to the bottom edge.
   const segments = 8;
-
-  const sleeperData = useMemo(() => {
-    const sleepers = [];
-    for (let i = 0; i <= segments; i++) {
-      const angle = (i / segments) * (Math.PI / 2);
-      const cx = Math.sin(angle) * 0.0;
-      const cz = Math.cos(angle) * 0.0;
-      // Sleeper orientation follows the curve tangent
-      sleepers.push({
-        x: Math.sin(angle) * 0.0,
-        z: Math.cos(angle) * 0.0,
-        angle,
-      });
-    }
-    return sleepers;
-  }, []);
 
   const railSegments = useMemo(() => {
     const segs = [];
@@ -91,8 +76,8 @@ function CurveRail({ colors }) {
       const innerR = 0.32;
       segs.push({
         type: 'inner',
-        x: Math.sin(midAngle) * innerR - 0.5,
-        z: Math.cos(midAngle) * innerR - 0.5,
+        x: 0.5 - Math.sin(midAngle) * innerR,
+        z: 0.5 - Math.cos(midAngle) * innerR,
         rotY: midAngle,
         length: (Math.PI / 2) * innerR / segments + 0.02,
       });
@@ -101,8 +86,8 @@ function CurveRail({ colors }) {
       const outerR = 0.68;
       segs.push({
         type: 'outer',
-        x: Math.sin(midAngle) * outerR - 0.5,
-        z: Math.cos(midAngle) * outerR - 0.5,
+        x: 0.5 - Math.sin(midAngle) * outerR,
+        z: 0.5 - Math.cos(midAngle) * outerR,
         rotY: midAngle,
         length: (Math.PI / 2) * outerR / segments + 0.02,
       });
@@ -117,8 +102,8 @@ function CurveRail({ colors }) {
       const angle = ((i + 0.5) / sleeperCount) * (Math.PI / 2);
       const centerR = 0.5;
       pieces.push({
-        x: Math.sin(angle) * centerR - 0.5,
-        z: Math.cos(angle) * centerR - 0.5,
+        x: 0.5 - Math.sin(angle) * centerR,
+        z: 0.5 - Math.cos(angle) * centerR,
         rotY: angle,
       });
     }
