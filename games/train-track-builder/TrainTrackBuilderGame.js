@@ -45,6 +45,10 @@ export default function TrainTrackBuilderGame() {
   const [showConfetti, setShowConfetti] = useState(false);
 
   const lastTapRef = useRef({ id: null, time: 0 });
+  const gridRef = useRef(grid);
+  gridRef.current = grid;
+  const poolRef = useRef(pool);
+  poolRef.current = pool;
 
   // Load persisted data
   useEffect(() => {
@@ -115,9 +119,12 @@ export default function TrainTrackBuilderGame() {
   }, [phase, pool]);
 
   // Place a piece on the grid (called from 3D scene click)
+  // Uses refs for grid/pool to avoid stale closures (GridCell memo skips onCellClick changes)
   const handleCellClick = useCallback((r, c) => {
     if (phase !== 'building') return;
-    const cell = grid[r][c];
+    const currentGrid = gridRef.current;
+    const currentPool = poolRef.current;
+    const cell = currentGrid[r][c];
 
     // If cell has a placed piece, handle rotation or removal
     if (cell.piece) {
@@ -125,17 +132,23 @@ export default function TrainTrackBuilderGame() {
       const cellKey = `${r},${c}`;
       // Double-tap detection for removal
       if (lastTapRef.current.id === cellKey && now - lastTapRef.current.time < 400) {
-        // Remove piece — return to pool
-        const newGrid = grid.map((row) => row.map((cl) => ({ ...cl })));
+        // Remove piece — return ONE matching piece to pool
+        const newGrid = currentGrid.map((row) => row.map((cl) => ({ ...cl })));
         const removedPiece = newGrid[r][c].piece;
         newGrid[r][c].piece = null;
         newGrid[r][c].rotation = 0;
         setGrid(newGrid);
-        setPool((prev) =>
-          prev.map((p) =>
-            p.used && p.pieceType === removedPiece ? { ...p, used: false } : p
-          )
-        );
+        setPool((prev) => {
+          let restored = false;
+          return prev.map((p) => {
+            if (!restored && p.used && p.pieceType === removedPiece) {
+              restored = true;
+              return { ...p, used: false };
+            }
+            return p;
+          });
+        });
+        setSelectedPieceId(null);
         revalidate(newGrid);
         lastTapRef.current = { id: null, time: 0 };
         return;
@@ -143,7 +156,7 @@ export default function TrainTrackBuilderGame() {
 
       // Single tap — rotate
       lastTapRef.current = { id: cellKey, time: now };
-      const newGrid = grid.map((row) => row.map((cl) => ({ ...cl })));
+      const newGrid = currentGrid.map((row) => row.map((cl) => ({ ...cl })));
       newGrid[r][c].rotation = rotateClockwise(newGrid[r][c].rotation);
       setGrid(newGrid);
       revalidate(newGrid);
@@ -152,11 +165,11 @@ export default function TrainTrackBuilderGame() {
 
     // If cell is empty/buildable and a piece is selected, place it
     if (cell.type === 'empty' && !cell.obstacle && selectedPieceId) {
-      const pieceIdx = pool.findIndex((p) => p.id === selectedPieceId);
-      if (pieceIdx === -1 || pool[pieceIdx].used) return;
+      const pieceIdx = currentPool.findIndex((p) => p.id === selectedPieceId);
+      if (pieceIdx === -1 || currentPool[pieceIdx].used) return;
 
-      const newGrid = grid.map((row) => row.map((cl) => ({ ...cl })));
-      newGrid[r][c].piece = pool[pieceIdx].pieceType;
+      const newGrid = currentGrid.map((row) => row.map((cl) => ({ ...cl })));
+      newGrid[r][c].piece = currentPool[pieceIdx].pieceType;
       newGrid[r][c].rotation = 0;
       setGrid(newGrid);
 
@@ -168,7 +181,7 @@ export default function TrainTrackBuilderGame() {
     }
 
     lastTapRef.current = { id: null, time: 0 };
-  }, [phase, grid, selectedPieceId, pool, revalidate]);
+  }, [phase, selectedPieceId, revalidate]);
 
   // "Go!" button — start train animation in 3D
   const handleGo = useCallback(() => {
