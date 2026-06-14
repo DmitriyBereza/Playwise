@@ -300,3 +300,32 @@ Implemented:
 
 Validation:
 - `npm run build` passed.
+
+Follow-up prompt: create Store Cashier Game (Three.js) — store owner serves customers, calculate total + give change via multiple choice (ages 5+).
+
+Skills used:
+- `game-builder` (primary)
+
+Implemented:
+- New game module: `games/store-cashier/`
+  - `StoreCashierGame.js` — state machine, HTML overlay UI
+  - `orderLogic.js` — order generation, payment/change math, MC options
+  - `scene/StoreScene.js`, `StoreModels.js`, `CustomerAnimation.js`, `animations.js`
+  - `storeCashier.module.css`, `GAME_INFO.txt`
+- New route: `app/games/store-cashier/page.js`
+- Catalog entry in `games/catalog.js` (age 5+, skills.math)
+- Preview asset: `public/games/store-cashier-preview.svg`
+- i18n (uk + en): `games.storeCashier.*`, `storeCashierGame.*` in `lib/i18n/messages.js`
+- Unit tests: `games/store-cashier/__tests__/orderLogic.test.js`
+
+Gameplay:
+- 3D storefront (Three.js + react-three-fiber) with customer walk-in/out animation
+- 12 customers per session; 3–4 items per order (totals up to 50)
+- Step 1: pick correct order total (multiple choice)
+- Step 2: customer pays round amount; pick correct change (multiple choice)
+- Max 2 wrong attempts per step; score +1 per fully correct customer
+- High score in localStorage (`storeCashierHighScoreV1`)
+
+Validation:
+- `npm test` passed (94 tests)
+- `npm run build` passed

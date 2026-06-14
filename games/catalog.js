@@ -79,4 +79,14 @@ export const gamesCatalog = [
     skills: ['skills.typing', 'skills.letterOrder', 'skills.logic'],
     path: '/games/word-builder',
   },
+  {
+    slug: 'store-cashier',
+    titleKey: 'games.storeCashier.title',
+    descriptionKey: 'games.storeCashier.description',
+    ageKey: 'ages.5plus',
+    ageGroup: '5plus',
+    image: '/games/store-cashier-preview.svg',
+    skills: ['skills.math'],
+    path: '/games/store-cashier',
+  },
 ];

@@ -1,0 +1,19 @@
+Store Cashier Game (store-cashier)
+==================================
+
+3D store cashier game for ages 5+. Customers walk to the counter, order 3-4 items,
+and the player picks the correct total and change from multiple-choice answers.
+
+Files:
+- StoreCashierGame.js — state machine, HTML overlay UI
+- orderLogic.js — order generation, payment/change math, MC options
+- scene/ — Three.js storefront (StoreScene, StoreModels, CustomerAnimation)
+- storeCashier.module.css — game-scoped styles
+
+Route: app/games/store-cashier/page.js
+Catalog: games.catalog.js entry slug store-cashier
+
+Gameplay phases:
+idle → customerEntering → showOrder → pickTotal → showPayment → pickChange → customerLeaving → (repeat / gameOver)
+
+Session: 12 customers. Score +1 per fully correct customer. Max 2 wrong attempts per step.
