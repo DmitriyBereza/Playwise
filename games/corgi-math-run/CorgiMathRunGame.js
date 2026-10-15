@@ -1,278 +1,209 @@
 'use client';
 
-import Image from 'next/image';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import LocaleSwitcher from '../../components/LocaleSwitcher';
 import { useI18n } from '../../lib/i18n/I18nProvider';
+import { DIFFICULTIES, buildEquation } from './mathLogic';
+import { CORGI_SKINS, getCorgiColors } from './scene/skinThemes';
 import styles from './corgiMathRun.module.css';
 
+const RunnerScene = dynamic(() => import('./scene/RunnerScene'), { ssr: false });
+
 const HIGH_SCORE_KEY = 'corgiMathRunHighScoreV1';
+const SKIN_KEY = 'corgiMathRunSkinV1';
 const MAX_WRONG_ATTEMPTS = 3;
-const FEEDBACK_MS = 560;
+const FEEDBACK_MS = 620;
 
-/* --- Named constants (fix #7) --- */
-const EQUATION_GENERATION_MAX_ATTEMPTS = 220;
-const SUBTRACTION_PROBABILITY = 0.32;
-const FALLBACK_EXTRA_RANGE = 2;
-const FALLBACK_RETRIES = 3;
-const HIGH_PROGRESS_THRESHOLD = 0.8;
-const MID_PROGRESS_THRESHOLD = 0.45;
-const OPTIONS_COUNT_HIGH = 5;
-const OPTIONS_COUNT_MID = 4;
-const OPTIONS_COUNT_LOW = 3;
-const OPTION_SPREAD_MULTIPLIER = 1.8;
-const MIN_OPTION_SPREAD = 2;
-const HINTS_PER_QUESTION = 1;
+const CONFETTI_COLORS = ['#FFB889', '#7BC5ED', '#8FD49A', '#FFD93D', '#FF8FAB', '#A78BFA'];
 
-const DIFFICULTIES = {
-  easy: { count: 10, maxNumber: 6 },
-  middle: { count: 15, maxNumber: 9 },
-  complex: { count: 20, maxNumber: 12 },
-};
-
-function randomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-/* --- Improved equation generation with graceful fallback (fix #8) --- */
-function buildEquation(usedKeys, difficulty, progressRatio) {
-  const { maxNumber } = DIFFICULTIES[difficulty];
-  let candidate = null;
-
-  for (let i = 0; i < EQUATION_GENERATION_MAX_ATTEMPTS; i += 1) {
-    const operation = Math.random() > SUBTRACTION_PROBABILITY ? '+' : '-';
-    let a = randomInt(1, maxNumber);
-    let b = randomInt(0, maxNumber);
-
-    if (operation === '-' && b > a) {
-      [a, b] = [b, a];
-    }
-
-    const key = `${a}${operation}${b}`;
-    if (!usedKeys.has(key)) {
-      const answer = operation === '+' ? a + b : a - b;
-      candidate = { key, text: `${a} ${operation} ${b}`, answer };
-      break;
-    }
-  }
-
-  /* Graceful fallback: widen the range incrementally before giving up */
-  if (!candidate) {
-    for (let extra = 1; extra <= FALLBACK_RETRIES; extra += 1) {
-      const bump = FALLBACK_EXTRA_RANGE * extra;
-      const operation = Math.random() > SUBTRACTION_PROBABILITY ? '+' : '-';
-      let a = randomInt(1, maxNumber + bump);
-      let b = randomInt(0, maxNumber + bump);
-
-      if (operation === '-' && b > a) {
-        [a, b] = [b, a];
-      }
-
-      const key = `${a}${operation}${b}`;
-      if (!usedKeys.has(key)) {
-        const answer = operation === '+' ? a + b : a - b;
-        candidate = { key, text: `${a} ${operation} ${b}`, answer };
-        break;
-      }
-    }
-  }
-
-  /* Last-resort: guaranteed unique addition */
-  if (!candidate) {
-    const a = randomInt(1, maxNumber + FALLBACK_EXTRA_RANGE * (FALLBACK_RETRIES + 1));
-    const b = randomInt(0, maxNumber + FALLBACK_EXTRA_RANGE * (FALLBACK_RETRIES + 1));
-    candidate = { key: `${a}+${b}`, text: `${a} + ${b}`, answer: a + b };
-  }
-
-  const optionCount =
-    progressRatio >= HIGH_PROGRESS_THRESHOLD
-      ? OPTIONS_COUNT_HIGH
-      : progressRatio >= MID_PROGRESS_THRESHOLD
-        ? OPTIONS_COUNT_MID
-        : OPTIONS_COUNT_LOW;
-
-  const optionsSet = new Set([candidate.answer]);
-  const spread = Math.max(MIN_OPTION_SPREAD, Math.ceil(optionCount * OPTION_SPREAD_MULTIPLIER));
-
-  while (optionsSet.size < optionCount) {
-    const delta = randomInt(-spread, spread);
-    if (delta === 0) {
-      continue;
-    }
-    optionsSet.add(Math.max(0, candidate.answer + delta));
-  }
-
-  const options = Array.from(optionsSet).sort(() => Math.random() - 0.5);
-  return { ...candidate, options };
+function heartsFor(wrongAttempts) {
+  return Array.from({ length: MAX_WRONG_ATTEMPTS }, (_, index) => index < MAX_WRONG_ATTEMPTS - wrongAttempts);
 }
 
 export default function CorgiMathRunGame() {
   const { t } = useI18n();
-  const [difficulty, setDifficulty] = useState('easy');
+
   const [phase, setPhase] = useState('idle');
+  const [difficulty, setDifficulty] = useState('easy');
+  const [skin, setSkin] = useState('forest');
   const [score, setScore] = useState(0);
-  const [targetCount, setTargetCount] = useState(DIFFICULTIES.easy.count);
   const [highScore, setHighScore] = useState(0);
+  const [targetCount, setTargetCount] = useState(DIFFICULTIES.easy.count);
   const [wrongAttempts, setWrongAttempts] = useState(0);
   const [equation, setEquation] = useState(null);
-  const [usedEquationKeys, setUsedEquationKeys] = useState(new Set());
   const [disabledOptions, setDisabledOptions] = useState([]);
-  const [status, setStatus] = useState('');
   const [feedback, setFeedback] = useState('idle');
-
-  /* --- New state: pause (fix #1) --- */
+  const [feedbackSeq, setFeedbackSeq] = useState(0);
+  const [questionId, setQuestionId] = useState(0);
+  const [status, setStatus] = useState('');
   const [paused, setPaused] = useState(false);
-
-  /* --- New state: hint system (fix #3) --- */
   const [hintUsed, setHintUsed] = useState(false);
-
-  /* --- New state: combo counter (fix #6) --- */
   const [combo, setCombo] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
 
-  const attemptsLeft = MAX_WRONG_ATTEMPTS - wrongAttempts;
-  const progressPercent = targetCount ? Math.min(100, (score / targetCount) * 100) : 0;
-  const finishX = 90;
-  const baseCorgiX = Math.min(76, 8 + progressPercent * 0.68);
-  const corgiX = phase === 'won' ? 84 : baseCorgiX;
-  const nextTargetRatio = Math.min(1, (score + 1) / Math.max(1, targetCount));
-  const obstacleX = phase === 'playing' ? Math.min(finishX - 9, 14 + nextTargetRatio * (finishX - 28)) : finishX - 8;
-  const farShift = Math.round(progressPercent * 0.35);
-  const midShift = Math.round(progressPercent * 0.65);
-  const frontShift = Math.round(progressPercent * 0.95);
-  const midDecorPositions = [0, 8, 16, 24, 32, 40, 48, 56, 64, 72, 80, 88, 96, 104, 112, 120];
-  const frontBushPositions = [2, 12, 22, 32, 42, 52, 62, 72, 82, 92, 102, 112];
-  const flowerPositions = [6, 18, 30, 44, 58, 70, 84, 98, 114];
+  const usedKeysRef = useRef(new Set());
+  const timersRef = useRef([]);
+
+  const colors = useMemo(() => getCorgiColors(skin), [skin]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((id) => clearTimeout(id));
+    timersRef.current = [];
+  }, []);
+
+  const schedule = useCallback((fn, delay) => {
+    const id = setTimeout(fn, delay);
+    timersRef.current.push(id);
+    return id;
+  }, []);
 
   useEffect(() => {
     setStatus(t('corgiMathGame.status.selectAndStart'));
   }, [t]);
 
   useEffect(() => {
-    const stored = Number(window.localStorage.getItem(HIGH_SCORE_KEY) || 0);
-    if (Number.isFinite(stored) && stored > 0) {
-      setHighScore(stored);
+    try {
+      const storedScore = Number(window.localStorage.getItem(HIGH_SCORE_KEY) || 0);
+      if (Number.isFinite(storedScore) && storedScore > 0) {
+        setHighScore(storedScore);
+      }
+      const storedSkin = window.localStorage.getItem(SKIN_KEY);
+      if (storedSkin && CORGI_SKINS[storedSkin]) {
+        setSkin(storedSkin);
+      }
+    } catch {
+      /* ignore */
     }
   }, []);
 
-  const hearts = useMemo(
-    () =>
-      Array.from({ length: MAX_WRONG_ATTEMPTS }, (_, index) => (
-        <span key={index} className={index < wrongAttempts ? styles.heartLost : styles.heart}>
-          ❤
-        </span>
-      )),
-    [wrongAttempts]
-  );
+  useEffect(() => () => clearTimers(), [clearTimers]);
 
-  const startGame = () => {
+  const lives = Math.max(0, MAX_WRONG_ATTEMPTS - wrongAttempts);
+  const progressPercent = targetCount ? Math.min(100, (score / targetCount) * 100) : 0;
+  const stars = wrongAttempts === 0 ? 3 : wrongAttempts === 1 ? 2 : 1;
+
+  const beginRun = useCallback(() => {
+    clearTimers();
     const target = DIFFICULTIES[difficulty].count;
-    const freshUsed = new Set();
-    const first = buildEquation(freshUsed, difficulty, 0);
-    freshUsed.add(first.key);
+    const used = new Set();
+    const first = buildEquation(used, difficulty, 0);
+    used.add(first.key);
+    usedKeysRef.current = used;
 
     setTargetCount(target);
     setScore(0);
     setWrongAttempts(0);
     setDisabledOptions([]);
-    setUsedEquationKeys(freshUsed);
     setEquation(first);
-    setPhase('playing');
     setFeedback('idle');
     setPaused(false);
     setHintUsed(false);
     setCombo(0);
+    setShowConfetti(false);
+    setQuestionId((id) => id + 1);
+    setPhase('playing');
     setStatus(t('corgiMathGame.status.ready'));
-  };
+  }, [clearTimers, difficulty, t]);
 
-  /* --- Pause / resume toggle (fix #1) --- */
-  const togglePause = () => {
-    setPaused((prev) => !prev);
-  };
+  const advance = useCallback(
+    (nextScore) => {
+      if (nextScore >= targetCount) {
+        setPhase('won');
+        setStatus(t('corgiMathGame.status.won'));
+        setShowConfetti(true);
+        return;
+      }
 
-  /* --- Hint handler (fix #3) --- */
-  const handleHint = () => {
-    if (hintUsed || !equation || paused) {
-      return;
-    }
+      const used = usedKeysRef.current;
+      const next = buildEquation(used, difficulty, nextScore / targetCount);
+      used.add(next.key);
 
-    const wrongOptions = equation.options.filter(
-      (opt) => opt !== equation.answer && !disabledOptions.includes(opt)
-    );
-
-    if (wrongOptions.length === 0) {
-      return;
-    }
-
-    const toEliminate = wrongOptions[randomInt(0, wrongOptions.length - 1)];
-    setDisabledOptions((prev) => [...prev, toEliminate]);
-    setHintUsed(true);
-  };
-
-  const handleCorrect = (nextScore) => {
-    if (nextScore > highScore) {
-      setHighScore(nextScore);
-      window.localStorage.setItem(HIGH_SCORE_KEY, String(nextScore));
-    }
-
-    if (nextScore >= targetCount) {
-      setPhase('won');
-      setStatus(t('corgiMathGame.status.won'));
-      return;
-    }
-
-    const nextUsed = new Set(usedEquationKeys);
-    const nextEquation = buildEquation(nextUsed, difficulty, nextScore / targetCount);
-    nextUsed.add(nextEquation.key);
-
-    setUsedEquationKeys(nextUsed);
-    setEquation(nextEquation);
-    setDisabledOptions([]);
-    setHintUsed(false);
-    setStatus(t('corgiMathGame.status.correct'));
-  };
+      setEquation(next);
+      setDisabledOptions([]);
+      setHintUsed(false);
+      setQuestionId((id) => id + 1);
+      setStatus(t('corgiMathGame.status.correct'));
+    },
+    [difficulty, targetCount, t]
+  );
 
   const handleAnswer = (value) => {
-    if (phase !== 'playing' || !equation || feedback === 'correct' || paused) {
+    if (phase !== 'playing' || !equation || feedback !== 'idle' || paused) {
+      return;
+    }
+    if (disabledOptions.includes(value)) {
       return;
     }
 
     if (value === equation.answer) {
-      setFeedback('correct');
       const nextScore = score + 1;
-      const nextCombo = combo + 1;
       setScore(nextScore);
-      setCombo(nextCombo);
-      window.setTimeout(() => {
-        setFeedback('idle');
-        handleCorrect(nextScore);
-      }, FEEDBACK_MS);
-      return;
-    }
+      setCombo((prev) => prev + 1);
 
-    if (disabledOptions.includes(value)) {
+      if (nextScore > highScore) {
+        setHighScore(nextScore);
+        try {
+          window.localStorage.setItem(HIGH_SCORE_KEY, String(nextScore));
+        } catch {
+          /* ignore */
+        }
+      }
+
+      setFeedback('correct');
+      setFeedbackSeq((seq) => seq + 1);
+      schedule(() => {
+        setFeedback('idle');
+        advance(nextScore);
+      }, FEEDBACK_MS);
       return;
     }
 
     const nextWrong = wrongAttempts + 1;
     setWrongAttempts(nextWrong);
     setDisabledOptions((prev) => [...prev, value]);
-    setFeedback('wrong');
     setCombo(0);
+    setFeedback('wrong');
+    setFeedbackSeq((seq) => seq + 1);
     setStatus(t('corgiMathGame.status.wrong'));
 
-    window.setTimeout(() => {
-      setFeedback('idle');
-    }, FEEDBACK_MS);
-
     if (nextWrong >= MAX_WRONG_ATTEMPTS) {
-      window.setTimeout(() => {
+      schedule(() => {
+        setFeedback('idle');
         setPhase('gameOver');
         setStatus(t('corgiMathGame.status.gameOver'));
       }, FEEDBACK_MS);
+    } else {
+      schedule(() => setFeedback('idle'), FEEDBACK_MS);
     }
   };
 
+  const handleHint = () => {
+    if (hintUsed || !equation || paused || feedback !== 'idle') {
+      return;
+    }
+
+    const wrongOptions = equation.options.filter(
+      (option) => option !== equation.answer && !disabledOptions.includes(option)
+    );
+    if (wrongOptions.length === 0) {
+      return;
+    }
+
+    const removed = wrongOptions[Math.floor(Math.random() * wrongOptions.length)];
+    setDisabledOptions((prev) => [...prev, removed]);
+    setHintUsed(true);
+  };
+
+  const togglePause = () => {
+    if (phase !== 'playing') {
+      return;
+    }
+    setPaused((prev) => !prev);
+  };
+
   const resetToMenu = () => {
+    clearTimers();
     setPhase('idle');
     setEquation(null);
     setDisabledOptions([]);
@@ -282,197 +213,240 @@ export default function CorgiMathRunGame() {
     setPaused(false);
     setHintUsed(false);
     setCombo(0);
+    setShowConfetti(false);
     setStatus(t('corgiMathGame.status.selectAndStart'));
   };
 
-  const showQuiz = phase === 'playing' && Boolean(equation);
+  const handleSkinChange = (key) => {
+    setSkin(key);
+    try {
+      window.localStorage.setItem(SKIN_KEY, key);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const pageBackground = `linear-gradient(180deg, ${colors.skyTop} 0%, ${colors.skyBottom} 62%, ${colors.grass} 100%)`;
+
+  if (phase === 'idle') {
+    return (
+      <div className={styles.page} style={{ background: pageBackground }}>
+        <div className={styles.localeCorner}>
+          <LocaleSwitcher />
+        </div>
+
+        <div className={styles.startScreen}>
+          <div className={styles.startCard}>
+            <h1 className={styles.startTitle}>{t('corgiMathGame.title')}</h1>
+            <p className={styles.startDesc}>{t('corgiMathGame.lead')}</p>
+
+            <div className={styles.optionGroup}>
+              <span className={styles.optionLabel}>{t('corgiMathGame.difficultyLabel')}</span>
+              <div className={styles.difficultyRow}>
+                {Object.entries(DIFFICULTIES).map(([key, value]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`${styles.difficultyBtn} ${difficulty === key ? styles.difficultyActive : ''}`}
+                    onClick={() => setDifficulty(key)}
+                    aria-pressed={difficulty === key}
+                  >
+                    <span className={styles.difficultyPaws} aria-hidden="true">
+                      {'🐾'.repeat(Object.keys(DIFFICULTIES).indexOf(key) + 1)}
+                    </span>
+                    <span className={styles.difficultyName}>{t(`corgiMathGame.difficulty.${key}`)}</span>
+                    <span className={styles.difficultyCount}>{value.count}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={styles.optionGroup}>
+              <span className={styles.optionLabel}>{t('corgiMathGame.skins.title')}</span>
+              <div className={styles.skinRow}>
+                {Object.entries(CORGI_SKINS).map(([key, value]) => (
+                  <button
+                    key={key}
+                    type="button"
+                    className={`${styles.skinBtn} ${skin === key ? styles.skinActive : ''}`}
+                    onClick={() => handleSkinChange(key)}
+                    aria-pressed={skin === key}
+                    style={{ background: `linear-gradient(180deg, ${value.skyTop}, ${value.grass})` }}
+                    title={t(value.nameKey)}
+                  >
+                    <span className={styles.skinName}>{t(value.nameKey)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {highScore > 0 && (
+              <p className={styles.recordBadge}>
+                {t('corgiMathGame.highScore')}: <strong>{highScore}</strong>
+              </p>
+            )}
+
+            <button type="button" className={styles.btnStart} onClick={beginRun}>
+              {t('corgiMathGame.startButton')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const showSummary = phase === 'won' || phase === 'gameOver';
 
   return (
-    <main className={styles.page}>
-      <section className={styles.card}>
-        <div className={styles.head}>
-          <div>
-            <h1>{t('corgiMathGame.title')}</h1>
-            <p>{t('corgiMathGame.lead')}</p>
+    <div className={styles.page} style={{ background: pageBackground }}>
+      <div className={styles.canvasWrapper}>
+        <RunnerScene
+          skin={skin}
+          phase={phase}
+          paused={paused}
+          questionId={questionId}
+          feedback={feedback}
+          feedbackSeq={feedbackSeq}
+        />
+      </div>
+
+      <div className={styles.overlay}>
+        <div className={styles.header}>
+          <div className={styles.stats}>
+            <div className={styles.stat}>
+              <span>{t('corgiMathGame.score')}</span>
+              <span className={styles.statValue}>{score}</span>
+            </div>
+            <div className={styles.stat}>
+              <span>{t('corgiMathGame.highScore')}</span>
+              <span className={styles.statValue}>{highScore}</span>
+            </div>
+            <div className={styles.stat}>
+              <span>{t('corgiMathGame.attemptsLeft')}</span>
+              <span className={styles.hearts} aria-hidden="true">
+                {heartsFor(wrongAttempts).map((alive, index) => (
+                  <span key={index} className={alive ? styles.heart : styles.heartLost}>
+                    ❤
+                  </span>
+                ))}
+              </span>
+            </div>
           </div>
           <LocaleSwitcher />
         </div>
 
-        <div className={styles.stats}>
-          <p>
-            {t('corgiMathGame.score')}: <strong>{score}</strong>
-          </p>
-          <p>
-            {t('corgiMathGame.highScore')}: <strong>{highScore}</strong>
-          </p>
-          <p>
-            {t('corgiMathGame.attemptsLeft')}: <strong>{attemptsLeft}</strong>
-          </p>
-          {/* --- Combo counter (fix #6) --- */}
-          {combo > 1 && (
-            <p>
-              <strong>{t('corgiMathGame.combo', { count: combo })}</strong>
-            </p>
-          )}
-        </div>
-
-        <div className={styles.hearts}>{hearts}</div>
-
-        {/* --- aria-live region for status (fix #4) --- */}
-        <p className={styles.status} aria-live="polite">
+        <div className={styles.statusBar} aria-live="polite">
           {paused ? t('common.paused') : status}
-        </p>
-
-        <div className={`${styles.track} ${feedback === 'correct' ? styles.trackCorrect : ''} ${feedback === 'wrong' ? styles.trackWrong : ''}`}>
-          <div className={`${styles.parallaxLayer} ${styles.farLayer}`} style={{ backgroundPositionX: `-${farShift}px` }} aria-hidden="true" />
-          <div className={`${styles.parallaxLayer} ${styles.midLayer}`} style={{ transform: `translateX(-${midShift}px)` }} aria-hidden="true">
-            {midDecorPositions.map((left, idx) => (
-              <Image
-                key={`mid-tree-${left}`}
-                src={idx % 2 === 0 ? '/games/corgi-math-run/cartoon-tree.svg' : '/games/corgi-math-run/pine-tree.svg'}
-                alt=""
-                width={idx % 2 === 0 ? 108 : 98}
-                height={idx % 2 === 0 ? 154 : 160}
-                className={`${styles.decor} ${styles.midTree}`}
-                style={{ left: `${left}%` }}
-              />
-            ))}
-          </div>
-          <div className={`${styles.parallaxLayer} ${styles.frontLayer}`} style={{ transform: `translateX(-${frontShift}px)` }} aria-hidden="true">
-            {frontBushPositions.map((left, idx) => (
-              <Image
-                key={`front-bush-${left}`}
-                src="/games/corgi-math-run/simple-bush.svg"
-                alt=""
-                width={idx % 2 === 0 ? 136 : 126}
-                height={idx % 2 === 0 ? 78 : 72}
-                className={`${styles.decor} ${styles.frontBush}`}
-                style={{ left: `${left}%` }}
-              />
-            ))}
-            {flowerPositions.map((left, idx) => (
-              <Image
-                key={`front-flowers-${left}`}
-                src="/games/corgi-math-run/decorative-flowers.svg"
-                alt=""
-                width={idx % 2 === 0 ? 98 : 90}
-                height={idx % 2 === 0 ? 62 : 56}
-                className={`${styles.decor} ${styles.frontFlowers}`}
-                style={{ left: `${left}%` }}
-              />
-            ))}
-          </div>
-          <div className={styles.groundLayer} aria-hidden="true" />
-          <div className={styles.progressLine}>
-            <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
-          </div>
-          <div className={styles.finishSpot} aria-hidden="true" style={{ left: `${finishX - 3}%` }}>
-            <Image src="/games/corgi-math-run/pile-of-bones.svg" alt="" width={82} height={74} className={styles.finishBones} />
-          </div>
-          <div className={styles.finishLine} aria-hidden="true" style={{ left: `${finishX}%` }}>
-            <Image src="/games/corgi-math-run/race-finish-line.svg" alt="" width={58} height={132} className={styles.finishFlag} />
-          </div>
-          <div className={`${styles.corgiWrap} ${feedback === 'correct' ? styles.corgiCelebrate : ''}`} style={{ left: `${corgiX}%` }}>
-            <Image src="/games/corgi-math-run/corgi-shadow.svg" alt="" width={86} height={20} className={styles.corgiShadow} />
-            <Image src="/games/corgi-math-run/corgi-character.svg" alt="Corgi" width={108} height={82} priority />
-          </div>
-          <div className={styles.obstacle} style={{ left: `${obstacleX}%` }}>
-            <Image
-              src="/games/corgi-math-run/wooden-log.svg"
-              alt=""
-              width={100}
-              height={54}
-              className={styles.obstacleBase}
-            />
-            <Image
-              src="/games/corgi-math-run/mushroom-obstacle.svg"
-              alt="Obstacle"
-              width={74}
-              height={74}
-              className={styles.obstacleImage}
-            />
-          </div>
         </div>
 
-        {phase === 'idle' && (
-          <section className={styles.menu}>
-            <h2>{t('corgiMathGame.startTitle')}</h2>
-            <p>{t('corgiMathGame.difficultyLabel')}</p>
-            <div className={styles.difficultyRow}>
-              {Object.keys(DIFFICULTIES).map((key) => (
-                <button
-                  key={key}
-                  type="button"
-                  className={`${styles.difficultyBtn} ${difficulty === key ? styles.difficultyActive : ''}`}
-                  onClick={() => setDifficulty(key)}
-                >
-                  {t(`corgiMathGame.difficulty.${key}`)}
-                  <span>{DIFFICULTIES[key].count}</span>
-                </button>
-              ))}
+        <div className={styles.spacer} />
+
+        {phase === 'playing' && (
+          <div className={styles.questionPanel}>
+            <div className={styles.progressTrack}>
+              <div className={styles.progressFill} style={{ width: `${progressPercent}%` }} />
             </div>
-            <button type="button" className={styles.startBtn} onClick={startGame}>
-              {t('corgiMathGame.startButton')}
-            </button>
-          </section>
-        )}
 
-        {showQuiz && (
-          <section className={`${styles.quiz} ${feedback === 'wrong' ? styles.quizWrong : ''} ${feedback === 'correct' ? styles.quizCorrect : ''}`}>
-            {/* --- Pause button (fix #1) --- */}
-            <button type="button" className={styles.secondaryBtn} onClick={togglePause}>
-              {paused ? t('common.resume') : t('common.pause')}
-            </button>
-
-            {!paused && (
+            {!paused && equation && (
               <>
-                <p>{t('corgiMathGame.question')}</p>
-                <h2>{equation.text} = ?</h2>
-                <div className={styles.options}>
-                  {equation.options.map((option, index) => (
-                    <button
-                      key={option}
-                      type="button"
-                      onClick={() => handleAnswer(option)}
-                      disabled={disabledOptions.includes(option)}
-                      className={disabledOptions.includes(option) ? styles.optionDisabled : ''}
-                      aria-label={`${t('corgiMathGame.question')} ${index + 1}: ${option}`}
-                    >
-                      {option}
-                    </button>
-                  ))}
+                <p className={styles.prompt}>{t('corgiMathGame.question')}</p>
+                <div className={styles.equation} aria-live="polite">
+                  {equation.text} = ?
                 </div>
-
-                {/* --- Hint button (fix #3) --- */}
-                <button
-                  type="button"
-                  className={styles.secondaryBtn}
-                  onClick={handleHint}
-                  disabled={hintUsed}
-                >
-                  {t('corgiMathGame.hint')}
-                </button>
+                <div className={styles.answers}>
+                  {equation.options.map((option) => {
+                    const disabled = disabledOptions.includes(option);
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        className={`${styles.answerBtn} ${disabled ? styles.answerDisabled : ''}`}
+                        onClick={() => handleAnswer(option)}
+                        disabled={disabled}
+                      >
+                        {option}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className={styles.quizActions}>
+                  <button type="button" className={styles.btnGhost} onClick={handleHint} disabled={hintUsed}>
+                    {t('corgiMathGame.hint')}
+                  </button>
+                  <button type="button" className={styles.btnGhost} onClick={togglePause}>
+                    {t('common.pause')}
+                  </button>
+                </div>
               </>
             )}
-          </section>
+
+            {paused && (
+              <div className={styles.pauseBox}>
+                <p>{t('common.paused')}</p>
+                <button type="button" className={styles.btnStart} onClick={togglePause}>
+                  {t('common.resume')}
+                </button>
+              </div>
+            )}
+          </div>
         )}
 
-        {showSummary && (
-          <section className={styles.gameOver}>
-            <h2>{phase === 'won' ? t('corgiMathGame.winTitle') : t('corgiMathGame.overTitle')}</h2>
-            <p>{phase === 'won' ? t('corgiMathGame.winText', { score }) : t('corgiMathGame.overText', { score })}</p>
+        {phase === 'playing' && combo > 1 && (
+          <div className={styles.comboBadge}>{t('corgiMathGame.combo', { count: combo })}</div>
+        )}
+      </div>
+
+      {showConfetti && (
+        <div className={styles.confetti} aria-hidden="true">
+          {Array.from({ length: 32 }).map((_, index) => (
+            <span
+              key={index}
+              className={styles.confettiPiece}
+              style={{
+                left: `${Math.random() * 100}%`,
+                background: CONFETTI_COLORS[index % CONFETTI_COLORS.length],
+                animationDelay: `${Math.random() * 0.5}s`,
+                animationDuration: `${1.1 + Math.random() * 1}s`,
+              }}
+            />
+          ))}
+        </div>
+      )}
+
+      {showSummary && (
+        <div className={styles.summary}>
+          <div className={styles.summaryCard}>
+            <div className={styles.summaryEmoji} aria-hidden="true">
+              {phase === 'won' ? '🐶🏁' : '🐾'}
+            </div>
+            <h2 className={styles.summaryTitle}>
+              {phase === 'won' ? t('corgiMathGame.winTitle') : t('corgiMathGame.overTitle')}
+            </h2>
+            {phase === 'won' && (
+              <div className={styles.stars} aria-label={t('corgiMathGame.starsLabel', { stars })}>
+                {[1, 2, 3].map((n) => (
+                  <span key={n} className={n <= stars ? styles.starOn : styles.starOff}>
+                    ★
+                  </span>
+                ))}
+              </div>
+            )}
+            <p className={styles.summaryText}>
+              {phase === 'won'
+                ? t('corgiMathGame.winText', { score })
+                : t('corgiMathGame.overText', { score })}
+            </p>
             <div className={styles.summaryActions}>
-              <button type="button" onClick={startGame}>
+              <button type="button" className={styles.btnStart} onClick={beginRun}>
                 {t('corgiMathGame.playAgain')}
               </button>
-              <button type="button" className={styles.secondaryBtn} onClick={resetToMenu}>
+              <button type="button" className={styles.btnGhost} onClick={resetToMenu}>
                 {t('corgiMathGame.backToMenu')}
               </button>
             </div>
-          </section>
-        )}
-      </section>
-    </main>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

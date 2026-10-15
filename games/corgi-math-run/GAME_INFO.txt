@@ -3,43 +3,42 @@ Audience: Kids 3-6
 
 Purpose:
 - Train basic arithmetic (simple addition/subtraction).
-- Build calm decision-making and focus.
-- Improve confidence through clear visual feedback.
+- Build calm decision-making and focus through a running adventure.
 
 Core loop:
-1) Player opens game menu and selects difficulty.
-2) Press Start to begin run.
-3) Corgi approaches obstacle equation with multiple answer options.
-4) Correct answer advances progress and score.
-5) Wrong answer disables that selected option and consumes attempt.
-6) 3 wrong attempts total => game over.
+1) Player opens the start screen and picks difficulty + scenery, then presses Start.
+2) The corgi runs through a 3D forest; an obstacle approaches from the right.
+3) Player picks the correct answer on a large tile.
+4) Correct answer => the corgi hops over the obstacle, progress advances, a new obstacle comes.
+5) Wrong answer disables that tile and costs a life (3 lives total).
+6) Clearing all questions wins with a star rating; 3 wrong answers ends the run.
 
-Difficulty levels:
-- easy: 10 equations
-- middle: 15 equations
-- complex: 20 equations
+Architecture:
+- `games/corgi-math-run/CorgiMathRunGame.js` — game state/logic shell + HTML HUD overlay.
+- `games/corgi-math-run/mathLogic.js` — testable equation/option generation (Fisher-Yates shuffle).
+- `games/corgi-math-run/scene/RunnerScene.js` — R3F Canvas + orthographic side-scroller camera.
+- `games/corgi-math-run/scene/Corgi.js` — low-poly corgi with run cycle + hop/bump animations.
+- `games/corgi-math-run/scene/Obstacle.js` — approaching log/mushroom/rock obstacle.
+- `games/corgi-math-run/scene/Environment.js` — parallax clouds, treelines, bushes, ground.
+- `games/corgi-math-run/scene/skinThemes.js` — forest/autumn/winter/night palettes.
+- `games/corgi-math-run/scene/animations.js` — easing helpers, timing + parallax constants.
+- `games/corgi-math-run/corgiMathRun.module.css` — stage + overlay + HUD styles.
+- `app/games/corgi-math-run/page.js` — route shell.
 
-Equation rules:
-- Equation keys are tracked to avoid repeats during a run.
-- Options are unique (no repeated suggestions in one question).
-- Option count grows near finish:
-  - early: 3 options
-  - middle: 4 options
-  - near finish: 5 options
+Tech:
+- Next.js dynamic import of the scene with `ssr: false` (Three.js needs window).
+- @react-three/fiber + @react-three/drei (OrthographicCamera), matching the train/store games.
+- Scene receives `phase`, `paused`, `questionId`, `feedback`, `feedbackSeq` to drive animation.
 
-State and scoring:
-- `score` increments by 1 per correct answer.
-- `wrongAttempts` max is 3.
+Difficulty levels (question counts):
+- easy: 10, middle: 15, complex: 20.
+
+Scoring:
+- `score` increments by 1 per correct answer; combo tracks a streak.
+- Lives start at 3 (`MAX_WRONG_ATTEMPTS`).
+- Win stars: 3 (no mistakes), 2 (one mistake), 1 (two mistakes).
 - `highScore` persisted in localStorage key: `corgiMathRunHighScoreV1`.
+- Chosen `skin` persisted in localStorage key: `corgiMathRunSkinV1`.
 
-Main files:
-- `games/corgi-math-run/CorgiMathRunGame.js`
-- `games/corgi-math-run/corgiMathRun.module.css`
-- `app/games/corgi-math-run/page.js`
-- `public/games/corgi-runner.svg`
-
-Figma asset integration:
-- Integrated vector assets adapted from Figma Make source (`FFTrIE9GtT1Q4220x25Q4d`) into local files:
-  - `public/games/corgi-math-run/corgi-character.svg`
-  - `public/games/corgi-math-run/mushroom-obstacle.svg`
-  - `public/games/corgi-math-run/forest-backdrop.svg`
+Testing:
+- `npm test -- mathLogic` covers equation generation, options, and shuffle.

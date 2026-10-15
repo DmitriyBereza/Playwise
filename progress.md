@@ -329,3 +329,32 @@ Gameplay:
 Validation:
 - `npm test` passed (94 tests)
 - `npm run build` passed
+
+Follow-up prompt: corgi-math-run feels incredibly old and bad — assess and improve it (full R3F rebuild to match train-station-builder tech).
+
+Skills used:
+- `game-builder` (primary)
+
+Diagnosis:
+- Game was a 2D DOM quiz with CSS-gradient parallax; corgi and obstacle positions were independent interpolations (no real approach/collision).
+- Dashboard-style stat boxes, emoji hearts, small answer pills; unused SVG assets; biased shuffle; no localStorage guard.
+
+Implemented (`games/corgi-math-run/`):
+- `mathLogic.js` — extracted, testable equation/option generation with Fisher–Yates shuffle
+- `__tests__/mathLogic.test.js` — 7 unit tests
+- `scene/RunnerScene.js` — R3F Canvas + orthographic side-scroller, dynamic `ssr:false`
+- `scene/Corgi.js` — low-poly corgi with run cycle + hop/bump animations
+- `scene/Obstacle.js` — approaching log/mushroom/rock obstacle with spin/wobble feedback
+- `scene/Environment.js` — parallax clouds, treelines, bushes, flowers, ground tufts
+- `scene/skinThemes.js` — forest/autumn/winter/night palettes
+- `scene/animations.js` — easing helpers, timing + parallax constants
+- `CorgiMathRunGame.js` — logic shell + glassmorphism HUD overlay, start screen, big answer tiles, pause, combo, star-rated summary, confetti
+- `corgiMathRun.module.css` — full-screen stage + overlay styles
+- i18n (uk + en): added `corgiMathGame.skins.*` and `corgiMathGame.starsLabel`
+- Updated `GAME_INFO.txt`; removed 13 now-unused public SVG assets
+
+Validation:
+- `npx jest games/corgi-math-run` passed (7 tests)
+- `npm run build` passed (lint + types)
+- Note: scene visuals not browser-verified (Playwright still unavailable in skill runtime).
+
